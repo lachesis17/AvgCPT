@@ -1,0 +1,8 @@
+__pycache__
+common/__pycache__
+*.ags
+*.gpj
+*.xlsx
+*.zip
+*.ldb
+*.bak

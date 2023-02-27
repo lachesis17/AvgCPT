@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1414</width>
+    <height>613</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>AVG CPT Data</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>images/icon.ico</normaloff>images/icon.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>841</x>
+      <y>10</y>
+      <width>561</width>
+      <height>551</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMaximumSize</enum>
+     </property>
+     <item>
+      <widget class="GraphicsLayoutWidget" name="plot_area">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>450</y>
+      <width>152</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="graph_button">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string>Add Line</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>30</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="button_gint">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Tahoma</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string>Open Gint...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_4">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>280</y>
+      <width>251</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QPushButton" name="button_depth">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string>Get CPT</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_5">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>280</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QPushButton" name="button_cpt_val">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string>Get Value</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QListWidget" name="point_table">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>80</y>
+      <width>311</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Tahoma</family>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QListWidget {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+	setAlignment(Qt::AlignCenter);
+}</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_6">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>510</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QPushButton" name="button_reset">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #7FB3D5;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string>Reset Graph</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QListWidget" name="depth_table">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>80</y>
+      <width>311</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Tahoma</family>
+     </font>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_9">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>20</y>
+      <width>211</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <item>
+      <widget class="QComboBox" name="cpt_table">
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #999999;
+    border-radius: 10px;
+    color: white;
+	padding: 4px;
+	padding-left: 6px;
+}
+
+QComboBox:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QComboBox:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>CPT Val</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_10">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>350</y>
+      <width>441</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_10">
+     <item>
+      <widget class="QComboBox" name="geol_layers">
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+	font: 9pt &quot;Tahoma&quot;;
+	font-weight: bold;
+    background: #999999;
+    border-radius: 10px;
+    color: white;
+	padding: 4px;
+	padding-left: 6px;
+}
+
+QComboBox:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QComboBox:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>GEOL Layers</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_11">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>450</y>
+      <width>261</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_11">
+     <item>
+      <widget class="QComboBox" name="avg_vals">
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+	font: 9pt &quot;Tahoma&quot;;
+	font-weight: bold;
+    background: #999999;
+    border-radius: 10px;
+    color: white;
+	padding: 4px;
+	padding-left: 6px;
+}
+
+QComboBox:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QComboBox:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Avg Vals</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_12">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>400</y>
+      <width>441</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_12">
+     <item>
+      <widget class="QPlainTextEdit" name="actual_val">
+       <property name="plainText">
+        <string>Actual val</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_13">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>510</y>
+      <width>441</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_13">
+     <item>
+      <widget class="QPlainTextEdit" name="average_val">
+       <property name="plainText">
+        <string>Avg val</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_7">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>394</y>
+      <width>32</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <item>
+      <widget class="QPushButton" name="button_copy_actual">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Tahoma</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #f0f0f0;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_8">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>505</y>
+      <width>32</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_14">
+     <item>
+      <widget class="QPushButton" name="button_copy_avg">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Tahoma</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	font: 9pt &quot;Tahoma&quot;;
+    background: #f0f0f0;
+    border-radius: 10px;
+    color: black;
+	padding:5px;
+}
+
+QPushButton:selected { /* italicize selected tabs */
+    color: black;
+}
+
+QPushButton:hover { /* italicize selected tabs */
+    background: #58D68D;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>360</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>1</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1414</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionSave_results"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen_folder">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Open folder...</string>
+   </property>
+  </action>
+  <action name="actionSave_results">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Open...</string>
+   </property>
+  </action>
+  <action name="actionOpen_file">
+   <property name="text">
+    <string>Open file(s)...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GraphicsLayoutWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
