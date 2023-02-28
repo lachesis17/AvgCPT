@@ -792,23 +792,23 @@ Are you sure you want to delete this much data?''')
         self.avg_vals.setEnabled(True)
 
 
-    def eventFilter(self, a: QObject, b: QEvent) -> bool:
-        if b.type() == QEvent.Type.WindowStateChange:
+    def eventFilter(self, object: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.WindowStateChange:
             maximized = bool(Qt.WindowState.WindowMaximized & self.windowState())
             self.config['Window']['maximized'] = str(maximized)
             with open('assets/settings.ini', 'w') as configfile: 
                 self.config.write(configfile)
         
-        return super().eventFilter(a, b)
+        return super().eventFilter(object, event)
     
-    def resizeEvent(self, a: QResizeEvent) -> None:
+    def resizeEvent(self, event: QResizeEvent) -> None:
         if not self.resizing:
             self.resizing = True
             timer = QTimer()
             timer.singleShot(500,self.on_resize_timer)
             timer.start()
         
-        return super().resizeEvent(a)
+        return super().resizeEvent(event)
     
     def on_resize_timer(self):
         if self.isMaximized():
