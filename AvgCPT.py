@@ -46,13 +46,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.unit_selector.valueChanged.connect(self.change_unit)
         self.button_gint.clicked.connect(self.get_file_location)
         self.button_depth.clicked.connect(self.get_cpt_depths)
-        self.graph_button.clicked.connect(self.add_line)
-        self.button_reset.clicked.connect(self.reset_graph)
         self.button_cpt_val.clicked.connect(self.get_avg_val)
         self.button_copy_actual.clicked.connect(self.copy_actual_value)
         self.button_copy_avg.clicked.connect(self.copy_average_value)
+        self.remove_before.clicked.connect(self.remove_data_before)
+        self.remove_after.clicked.connect(self.remove_data_after)
+        self.remove_at.clicked.connect(self.remove_data_at)
+        self.re_plot.clicked.connect(self.recalc_avg)
+        self.increment.clicked.connect(self.strain_num_incr)
+        self.decrement.clicked.connect(self.strain_num_decr)
+        
+        #set window size and graph
+        self.installEventFilter(self)
+        self.set_size()
         self.setup_graph()
         self.dark_mode()
+
 
 
     def setup_graph(self):
@@ -141,8 +150,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actual_val.clear()
         self.cpt_table.clear()
         self.depth_table.clear()
-        self.graph_button.setEnabled(False)
-        self.button_reset.setEnabled(False)
 
         try:
             self.bh_select = self.point_table.currentItem().text()
@@ -171,7 +178,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         depth_list = list(self.cpt_data['true_depth'])
         
-        self.full_depth =[]
+        self.full_depth = []
         for x in range(0,len(depth_list)):
             self.full_depth.append(round(float(depth_list[x]),2))
 
@@ -278,6 +285,7 @@ UNITISED LAYERS: {self.geol_layers_list}
 
 
     def get_avg_val(self):
+        self.full_bh.setChecked(False)
         self.cpt_value = self.cpt_table.currentText()
         rows = self.cpt_data.shape[0]
         avg_list = []
@@ -288,15 +296,15 @@ UNITISED LAYERS: {self.geol_layers_list}
         min_count = 0
 
         try:
-            cpt_depth = self.depth_table.currentItem().text()
+            self.cpt_depth = self.depth_table.currentItem().text()
         except AttributeError:
             print("No depth selected.")
             return
 
         print(f"""****************************************           
-Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
+Querying {self.cpt_value} at {self.cpt_depth}m from {self.bh_select}""")
 
-        self.get_geol_layers(bh=self.bh_select, depth=cpt_depth)
+        self.get_geol_layers(bh=self.bh_select, depth=self.cpt_depth)
 
         min_datapoint = 0
         if not rows - 1 == -1:
@@ -308,17 +316,17 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             elif np.isnan(float(self.cpt_data['true_depth'][row])) == True:
                 pass
             else:
-                if float(self.cpt_data['true_depth'][row]) <= (float(cpt_depth) - float(0.5)):
+                if float(self.cpt_data['true_depth'][row]) <= (float(self.cpt_depth) - float(0.5)):
                     min_datapoint = row
-                elif float(self.cpt_data['true_depth'][row]) >= (float(cpt_depth) + float(0.5)) and not float(self.cpt_data['true_depth'][row]) > (float(cpt_depth) + float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) >= (float(self.cpt_depth) + float(0.5)) and not float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
                     max_datapoint = row
-                elif float(self.cpt_data['true_depth'][row]) > (float(cpt_depth) + float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
                     break
                 #need to somehow implement this so it doesnt take the spikes without not plotting anything if the above depths contain no data
                 elif not row == rows -1:
                     if not float(self.cpt_data['true_depth'][row]) < 0.15:
                         if float(self.cpt_data['true_depth'][row+1]) % float(self.cpt_data['true_depth'][row]) > 0.15:
-                            if float(self.cpt_data['true_depth'][row]) == float(cpt_depth):
+                            if float(self.cpt_data['true_depth'][row]) == float(self.cpt_depth):
                                 self.reset_graph()
                                 return print("this depth is in a data gap")
                             #need to understand why it cant get avg_row - 22.88m BHCPT67A
@@ -326,12 +334,12 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
                             max_datapoint = row
                             break
 
-            if str(self.cpt_data['true_depth'][row]) == str(cpt_depth):
+            if str(self.cpt_data['true_depth'][row]) == str(self.cpt_depth):
                 avg_row = row         
                 cpt_result = self.cpt_data[self.cpt_value][row]
                 self.actual_val.clear()
-                self.actual_val.setText(f'''<p align="center">{self.bh_select} value for {self.cpt_value} at {cpt_depth}m is: {self.cpt_data[self.cpt_value][row]}</p>''')
-                print(f"The value for {self.cpt_value} at {cpt_depth}m is: {self.cpt_data[self.cpt_value][row]}")
+                self.actual_val.setText(f'''<p align="center">{self.bh_select} value for {self.cpt_value} at {self.cpt_depth}m is: {self.cpt_data[self.cpt_value][row]}</p>''')
+                print(f"The value for {self.cpt_value} at {self.cpt_depth}m is: {self.cpt_data[self.cpt_value][row]}")
 
         # print(f"min row: {min_datapoint} - data is: {self.cpt_data[self.cpt_value][min_datapoint]} - depth is: {self.cpt_data['true_depth'][min_datapoint]}")
         # print(f"avg row: {avg_row} - data is: {self.cpt_data[self.cpt_value][avg_row]} - depth is: {self.cpt_data['true_depth'][avg_row]}")
@@ -345,7 +353,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
                 self.geol_layers.setCurrentIndex(layer) 
 
         for row in range(min_datapoint, max_datapoint):
-            if float(self.cpt_data['true_depth'][row]) < (float(cpt_depth) - float(0.51)):
+            if float(self.cpt_data['true_depth'][row]) < (float(self.cpt_depth) - float(0.51)):
                 min_datapoint += 1
 
         for row in range(min_datapoint, max_datapoint):
@@ -355,23 +363,30 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             elif row >= rows:
                 max_count = row - rows
                 pass
-            #this line means that if there is no data in +0.5m (e.g. BHCPT67A 18.90m) it can't append max_count as value == None
+            #this line means that if there is no data in +0.5m (e.g. BHCPT67A 18.90m) it can't append max_count as value == None (resolved)
             elif not self.cpt_data[self.cpt_value][row] == None and not self.cpt_data[self.cpt_value][row] == "":
-                if float(self.cpt_data['true_depth'][row]) >= float(self.layer[1]) and not float(self.cpt_data['true_depth'][row]) > (float(cpt_depth) + float(0.51)):
+                if float(self.cpt_data['true_depth'][row]) >= float(self.layer[1]) and not float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
                     print(f"""Average data ranges for {self.cpt_data['true_depth'][row]} exceeds layer range of {self.layer}, cutting data...""")
                     max_count +=1
                     pass
-                elif float(self.cpt_data['true_depth'][row]) < float(self.layer[0]) and not float(self.cpt_data['true_depth'][row]) < (float(cpt_depth) - float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) < float(self.layer[0]) and not float(self.cpt_data['true_depth'][row]) < (float(self.cpt_depth) - float(0.51)):
                     print(f"""Average data ranges for {self.cpt_data['true_depth'][row]} precedes layer range of {self.layer}, cutting data...""")
                     min_count += 1
                     pass
                 # elif float(self.cpt_data['true_depth'][row]) % float(self.cpt_data['true_depth'][avg_row]) < 0.5:
                 #     min_count += 1
-                #does this work?
+                #does this work? - nope
                 else:
                     avg_list.append(float(self.cpt_data[self.cpt_value][row]))
                     depth_with_value[f"{self.cpt_data['true_depth'][row]}m"] = self.cpt_data[self.cpt_value][row]
 
+        #check if layer is less than 1m otherwise the +/- 0.5m range cannot get correct index of vals
+        if self.layer[1] - self.layer[0] < float(0.999):
+            zero_count = 0
+            min_count = 0
+            max_count = 0
+
+        #if -0.5m puts range before zero
         if not zero_count == 0:
             for row in range (0 + zero_count, (max_datapoint) + zero_count):
                 if row >= rows:
@@ -380,6 +395,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
                     avg_list.append(float(self.cpt_data[self.cpt_value][row]))
                     depth_with_value[f"{self.cpt_data['true_depth'][row]}m"] = self.cpt_data[self.cpt_value][row]
 
+        #if -0.5m gets cut because of end of layer, append values from above. min_count = the difference of data points exceeding range + (requested depth + 0.5m)
         if not min_count == 0:
             for row in range (min_datapoint + min_count, (max_datapoint) + min_count):
                 if row >= rows or row < 0:
@@ -388,6 +404,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
                     avg_list.append(float(self.cpt_data[self.cpt_value][row]))
                     depth_with_value[f"{self.cpt_data['true_depth'][row]}m"] = self.cpt_data[self.cpt_value][row]
 
+        #if -0.5m gets cut because of end of layer or hole, append values from above. max_count = the difference of data points exceeding range - (requested depth - 0.5m)
         if not max_count == 0:
             for row in range(min_datapoint,(min_datapoint - max_count),-1):
                 if row >= rows:
@@ -409,7 +426,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             x_coord.append(float(str(v)))
 
         for y in range(0, len(y_coord)):
-            if float(y_coord[y]) == float(cpt_depth):
+            if float(y_coord[y]) == float(self.cpt_depth):
                 self.avg_line = y
 
         self.avg_vals.clear()
@@ -430,7 +447,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             return
         else:
             for depth, value in depth_with_value.items():
-                if str(depth).split("m")[0] == str(cpt_depth):
+                if str(depth).split("m")[0] == str(self.cpt_depth):
                     self.avg_vals.setCurrentText(str(f"{depth} - {value}"))
                     break
                 else:
@@ -440,21 +457,12 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
         self.avg_vals.setEnabled(True)
 
         self.average_val.clear()
-        self.average_val.setText(f'''<p align="center">{self.bh_select} average value for {self.cpt_value} at {cpt_depth}m is: {round(avg_val, 4)}</p>''')
-        print(f"""The average value for {self.cpt_value} at {cpt_depth}m is: {avg_val}
+        self.average_val.setText(f'''<p align="center">{self.bh_select} average value for {self.cpt_value} at {self.cpt_depth}m is: {round(avg_val, 4)}</p>''')
+        print(f"""The average value for {self.cpt_value} at {self.cpt_depth}m is: {avg_val}
 ****************************************""")
         self.reset_graph()
         self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
-        self.graph_button.setEnabled(True)
-        self.button_reset.setEnabled(True)
         self.play_coin()
-
-    def plot_full_bh(self):
-        self.play_coin()
-        self.reset_graph()
-        self.plot_graph(x=self.cpt_data[self.cpt_value], y=self.full_depth, cpt_value=self.cpt_value)
-        self.dark_mode()
-
         
     def play_coin(self):
         coin_num = np.random.randint(77)
@@ -475,11 +483,26 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             self.player.setMedia(content)
             self.player.setVolume(33)
             self.player.play()
-    
 
+    def plot_full_bh(self):
+        self.play_coin()
+        self.reset_graph()
+        self.dark_mode()
+
+        if self.full_bh.isChecked() == True:
+            #need to fix all the empty strings (e.g. beacon gint) otherwise .plot() cannot get min and max bounding values for axis as not real number (convert empty string to nan)
+            x_fixed = list(self.cpt_data[self.cpt_value])
+            for x in range(0, len(x_fixed)):
+                if not x_fixed[x] == None:
+                    if x_fixed[x] == '' or x_fixed[x] == "":
+                        x_fixed[x] = float('nan')
+                    else:
+                        x_fixed[x] = float(x_fixed[x])
+            self.plot_graph(x_fixed, self.full_depth, cpt_value=self.cpt_value)
+        else:
+            self.plot_graph(self.x, self.y, cpt_value=self.cpt_value)
+    
     def plot_graph(self, x, y, cpt_value):
-        self.x = x
-        self.y = y
         if self.dark_mode_button.isChecked() == True and self.full_bh.isChecked() == False:
             self.graph_plot.plot(x,y, symbol='o', symbolSize='5', pen='w', symbolPen='r', symbolBrush='r', axisx='w', axisy='w')
         elif self.full_bh.isChecked() == True:
@@ -502,9 +525,121 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
         print("Copied average value to clipboard.")
         pyperclip.copy(self.average_val.toPlainText())
 
+    def remove_data_before(self):
+        if hasattr(self, 'line'):
+            if self.avg_line == 0:
+                del self.y[self.avg_line]
+                del self.x[self.avg_line]
+                delattr(self, 'line')
+            else:
+                if abs(0-self.avg_line) > 5:
+                    confirm = QMessageBox
+                    ask = confirm.question(self, '', f'''You are about to remove a lot of data.
+{abs(0-self.avg_line)} data points in total.
+Are you sure you want to delete this much data?''')
+                    if ask == confirm.Yes:
+                        del self.y[0:self.avg_line]
+                        del self.x[0:self.avg_line]
+                        self.reset_graph()
+                        self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
+                        delattr(self, 'line')
+                    else:
+                        return
+                else:
+                    del self.y[0:self.avg_line]
+                    del self.x[0:self.avg_line]
+                self.reset_graph()
+                self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
+        else:
+            return
+        
+
+    def remove_data_after(self):
+        if hasattr(self, 'line'):
+            if self.avg_line >= len(self.y):
+                del self.y[self.avg_line]
+                del self.x[self.avg_line]
+                delattr(self, 'line')
+            else:
+                if abs(self.avg_line-len(self.y)) > 5:
+                    confirm = QMessageBox
+                    ask = confirm.question(self, '', f'''You are about to remove a lot of data.
+{abs(self.avg_line-len(self.y))} data points in total.
+Are you sure you want to delete this much data?''')
+                    if ask == confirm.Yes:
+                        del self.y[self.avg_line:len(self.y)]
+                        del self.x[self.avg_line:len(self.x)]
+                        self.reset_graph()
+                        self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
+                        delattr(self, 'line')
+                    else:
+                        return
+                else:    
+                    del self.y[self.avg_line:len(self.y)]
+                    del self.x[self.avg_line:len(self.x)]
+            self.reset_graph()
+            self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
+        else:
+            return
+        
+    def remove_data_at(self):
+        if hasattr(self, 'line'):
+            del self.y[self.avg_line]
+            del self.x[self.avg_line]
+            self.reset_graph()
+            self.plot_graph(x=self.x, y=self.y, cpt_value=self.cpt_value)
+            delattr(self, 'line')
+        else:
+            return
+        
+    def strain_num_incr(self):
+        if (self.avg_line + 1) >= len(self.y):
+            self.avg_line = 0
+        else:
+            self.avg_line += 1
+        self.add_line()
+
+    def strain_num_decr(self):
+        if (self.avg_line - 1) < 0:
+            self.avg_line = len(self.y) - 1
+        else:
+            self.avg_line -= 1
+        self.add_line()
+
     def add_line(self):
-        self.line = pg.InfiniteLine(pos=self.y[self.avg_line], angle=0, pen=pg.mkPen('r', width=2), movable=True)
-        self.graph_plot.addItem(self.line)
+        if hasattr(self, 'line'):
+            self.graph_plot.removeItem(self.line)
+        try:
+            self.line = pg.InfiniteLine(pos=self.y[self.avg_line], angle=0, pen=pg.mkPen('r', width=2), movable=False)
+            self.graph_plot.addItem(self.line)
+        except:
+            pass
+
+    def recalc_avg(self):
+        x = self.x
+        y = self.y
+        self.avg_vals.clear()
+
+        new_depth_with_val = []
+
+        for data_point in range(0, len(y)):
+            new_depth_with_val.append(f"{y[data_point]}m - {x[data_point]}")
+
+        self.avg_vals.addItems(new_depth_with_val)
+        print(new_depth_with_val)
+        for item in range(0, len(new_depth_with_val)):
+            if str(new_depth_with_val[item]).split("m")[0] == str(self.cpt_depth):
+                self.avg_vals.setCurrentText(str(f"{new_depth_with_val[item]}"))
+                break
+            else:
+                self.avg_vals.setCurrentIndex(0)
+
+        avg_val = statistics.mean(self.x)
+
+        self.average_val.clear()
+        self.average_val.setText(f'''<p align="center">{self.bh_select} (recalculated) average value for {self.cpt_value} at {self.cpt_depth}m is: {round(avg_val, 4)}</p>''')
+        print(f"""Recalculated average value for {self.cpt_value} at {self.cpt_depth}m is: {avg_val}
+****************************************""")
 
     def dark_toggle(self):
         self.play_nice()
@@ -553,8 +688,12 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             self.button_gint.setStyleSheet(f"{self.config.get('Theme','button_css_light')}")
             self.button_depth.setStyleSheet(f"{self.config.get('Theme','button_css_light')}")
             self.button_cpt_val.setStyleSheet(f"{self.config.get('Theme','button_css_light')}")
-            self.graph_button.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
-            self.button_reset.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.remove_before.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.remove_after.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.remove_at.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.re_plot.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.increment.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
+            self.decrement.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
             self.cpt_table.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
             self.geol_layers.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
             self.avg_vals.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
@@ -612,8 +751,12 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
             self.button_gint.setStyleSheet(f"{self.config.get('Theme','button_css')}")
             self.button_depth.setStyleSheet(f"{self.config.get('Theme','button_css')}")
             self.button_cpt_val.setStyleSheet(f"{self.config.get('Theme','button_css')}")
-            self.graph_button.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
-            self.button_reset.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.remove_before.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.remove_after.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.remove_at.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.re_plot.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.increment.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
+            self.decrement.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
             self.cpt_table.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
             self.geol_layers.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
             self.avg_vals.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
@@ -637,8 +780,7 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
         self.button_copy_actual.setEnabled(False)
         self.avg_vals.setEnabled(False)
         self.button_copy_avg.setEnabled(False)
-        self.graph_button.setEnabled(False)
-        self.button_reset.setEnabled(False)
+
 
     def enable_buttons(self):
         self.button_depth.setEnabled(True)
@@ -648,9 +790,55 @@ Querying {self.cpt_value} at {cpt_depth}m from {self.bh_select}""")
         self.button_copy_actual.setEnabled(True)
         self.button_copy_avg.setEnabled(True)
         self.avg_vals.setEnabled(True)
-        self.graph_button.setEnabled(True)
-        self.button_reset.setEnabled(True)
 
+
+    def eventFilter(self, a: QObject, b: QEvent) -> bool:
+        if b.type() == QEvent.Type.WindowStateChange:
+            maximized = bool(Qt.WindowState.WindowMaximized & self.windowState())
+            self.config['Window']['maximized'] = str(maximized)
+            with open('assets/settings.ini', 'w') as configfile: 
+                self.config.write(configfile)
+        
+        return super().eventFilter(a, b)
+    
+    def resizeEvent(self, a: QResizeEvent) -> None:
+        if not self.resizing:
+            self.resizing = True
+            timer = QTimer()
+            timer.singleShot(500,self.on_resize_timer)
+            timer.start()
+        
+        return super().resizeEvent(a)
+    
+    def on_resize_timer(self):
+        if self.isMaximized():
+            self.resizing = False
+            return
+        
+        width = str(self.size().width())
+        height = str(self.size().height())
+        
+        self.config['Window']['width'] = width
+        self.config['Window']['height'] = height
+        with open('assets/settings.ini', 'w') as configfile: 
+            self.config.write(configfile)
+        self.resizing = False
+    
+    def set_size(self):
+        self.resizing = True
+        
+        if self.config.getboolean('Window','maximized',fallback=False):
+            width = self.config['Window']['width']
+            height = self.config['Window']['height']
+            self.resize(QSize(int(width),int(height)))
+            self.showMaximized()
+            return
+        
+        width = self.config['Window']['width']
+        height = self.config['Window']['height']
+        self.resize(QSize(int(width),int(height)))
+        self.resizing = False
+        
 
 def main():
     app = QtWidgets.QApplication([sys.argv])

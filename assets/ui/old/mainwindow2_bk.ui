@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1060</width>
-    <height>540</height>
+    <width>1300</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1060</width>
-    <height>540</height>
+    <width>1300</width>
+    <height>581</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -157,32 +157,6 @@ p, li { white-space: pre-wrap; }
         <item row="2" column="2">
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <spacer name="verticalSpacer_13">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_15">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QPushButton" name="re_plot">
             <property name="text">
              <string>Re-Calc Avg</string>
@@ -204,32 +178,6 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <spacer name="verticalSpacer_11">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_17">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_16">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -280,8 +228,8 @@ p, li { white-space: pre-wrap; }
              <widget class="QPushButton" name="decrement">
               <property name="maximumSize">
                <size>
-                <width>22</width>
-                <height>22</height>
+                <width>25</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="font">
@@ -320,8 +268,8 @@ p, li { white-space: pre-wrap; }
              <widget class="QPushButton" name="increment">
               <property name="maximumSize">
                <size>
-                <width>22</width>
-                <height>22</height>
+                <width>25</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="font">
@@ -353,19 +301,6 @@ p, li { white-space: pre-wrap; }
              <string>Cut Below</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_18">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>
@@ -499,7 +434,7 @@ QPushButton:hover { /* italicize selected tabs */
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>175</width>
+                  <width>200</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -623,7 +558,7 @@ QPushButton:disabled {
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>175</width>
+                  <width>200</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -1000,8 +935,8 @@ QPushButton:hover { /* italicize selected tabs */
           </property>
           <property name="minimumSize">
            <size>
-            <width>450</width>
-            <height>400</height>
+            <width>488</width>
+            <height>534</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -1023,7 +958,7 @@ QPushButton:hover { /* italicize selected tabs */
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1060</width>
+     <width>1300</width>
      <height>21</height>
     </rect>
    </property>
