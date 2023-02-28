@@ -316,11 +316,11 @@ Querying {self.cpt_value} at {self.cpt_depth}m from {self.bh_select}""")
             elif np.isnan(float(self.cpt_data['true_depth'][row])) == True:
                 pass
             else:
-                if float(self.cpt_data['true_depth'][row]) <= (float(self.cpt_depth) - float(0.5)):
+                if float(self.cpt_data['true_depth'][row]) < (float(self.cpt_depth) - float(0.51)):
                     min_datapoint = row
-                elif float(self.cpt_data['true_depth'][row]) >= (float(self.cpt_depth) + float(0.5)) and not float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) <= (float(self.cpt_depth) + float(0.5)):
                     max_datapoint = row
-                elif float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.5)):
                     break
                 #need to somehow implement this so it doesnt take the spikes without not plotting anything if the above depths contain no data
                 elif not row == rows -1:
@@ -365,11 +365,11 @@ Querying {self.cpt_value} at {self.cpt_depth}m from {self.bh_select}""")
                 pass
             #this line means that if there is no data in +0.5m (e.g. BHCPT67A 18.90m) it can't append max_count as value == None (resolved)
             elif not self.cpt_data[self.cpt_value][row] == None and not self.cpt_data[self.cpt_value][row] == "":
-                if float(self.cpt_data['true_depth'][row]) >= float(self.layer[1]) and not float(self.cpt_data['true_depth'][row]) > (float(self.cpt_depth) + float(0.51)):
+                if float(self.cpt_data['true_depth'][row]) >= float(self.layer[1]) and not float(self.cpt_data['true_depth'][row]) >= (float(self.cpt_depth) + float(0.5)):
                     print(f"""Average data ranges for {self.cpt_data['true_depth'][row]} exceeds layer range of {self.layer}, cutting data...""")
                     max_count +=1
                     pass
-                elif float(self.cpt_data['true_depth'][row]) < float(self.layer[0]) and not float(self.cpt_data['true_depth'][row]) < (float(self.cpt_depth) - float(0.51)):
+                elif float(self.cpt_data['true_depth'][row]) <= float(self.layer[0]) and not float(self.cpt_data['true_depth'][row]) <= (float(self.cpt_depth) - float(0.5)):
                     print(f"""Average data ranges for {self.cpt_data['true_depth'][row]} precedes layer range of {self.layer}, cutting data...""")
                     min_count += 1
                     pass
