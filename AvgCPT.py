@@ -13,6 +13,9 @@ import pyodbc
 import statistics
 import numpy as np
 import configparser
+import openpyxl
+from openpyxl.styles import Font, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 import warnings
 warnings.filterwarnings("ignore")
 QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough) 
@@ -55,6 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.re_plot.clicked.connect(self.recalc_avg)
         self.increment.clicked.connect(self.strain_num_incr)
         self.decrement.clicked.connect(self.strain_num_decr)
+        self.full_export.clicked.connect(self.export_full_averages)
+        self.actionExport_Averages_for_All.triggered.connect(self.export_full_averages)
         
         #set window size and graph
         self.installEventFilter(self)
@@ -92,6 +97,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.file_location = self.file_location[0][0]
             self.point_table.setEnabled(True)
             self.depth_table.setEnabled(True)
+            self.full_export.setEnabled(True)
             last_dir = str(os.path.dirname(self.file_location))
             self.config.set('LastFolder','dir',last_dir)
             with open('assets/settings.ini', 'w') as configfile: 
@@ -107,6 +113,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.disable_buttons()
             self.point_table.setEnabled(False)
             self.depth_table.setEnabled(False)
+            self.full_export.setEnabled(False)
             return
         print(f"Opening {self.file_location}...")
 
@@ -176,6 +183,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cpt_data.sort_values(by=['true_depth'], inplace=True)
         self.cpt_data['true_depth'] = self.cpt_data['true_depth'].map('{:,.2f}'.format)
 
+        depth_float = pd.to_numeric(self.cpt_data['true_depth'])
+        self.cpt_data['true_depth'] = depth_float
+ 
         depth_list = list(self.cpt_data['true_depth'])
         
         self.full_depth = []
@@ -224,7 +234,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.geol = pd.read_sql(query, self.gint)
 
         if self.geol.empty:
-            print(f'no geol for this bh: {self.bh_select}')
+            print(f'no geol for this bh: {bh}')
             return
 
         self.geol.sort_values(by=['Depth'], inplace=True)
@@ -251,12 +261,62 @@ class MainWindow(QtWidgets.QMainWindow):
         soil_units = list(zip(units, layer_leg))
             
         if not all(v for v in units):
-            print("pls call fred or ryan to unitise this shit")
+            print("No unitisation - using Geology Legend")
             self.unitised_layers = dict(zip(layers,soil_units))
         else:
             self.unitised_layers = dict(zip(layers,soil_units))
 
         self.geol_layers_list = []
+
+        if depth == None:
+            for (layer, unit) in self.unitised_layers.items():
+                qc_list = None
+                fs_list = None
+                u2_list = None
+                qnet_list = None
+                fr_list = None
+                ic_list = None
+
+                depth = round((float(layer[0]) + float(layer[1])) / 2,2)
+                qc_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_QC']
+                fs_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_FS']
+                u2_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_U']
+                qnet_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_Qnet']
+                fr_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_FCRO']
+                ic_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), 'STCN_SBTi']
+
+                self.fs_dict[f'Layers'] = ['fs mean (MPa)','fs std (MPa)']
+                self.u2_dict[f'Layers'] = ['u mean (kPa)','u std (kPa)']
+                self.qnet_dict[f'Layers'] = ['qnet mean (MPa)','qnet std (MPa)']
+                self.fr_dict[f'Layers'] = ['fr mean (-)','fr std (-)']
+                self.ic_dict[f'Layers'] = ['ic mean (-)','ic std (-)']
+
+                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list.mean(),qc_list.std()]
+                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list.mean(),fs_list.std()]
+                self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list.mean(),u2_list.std()]
+                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list.mean(),qnet_list.std()]
+                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fr_list.mean(),fr_list.std()]
+                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [ic_list.mean(),ic_list.std()]
+
+                if float(depth) >= float(layer[0]) and float(depth) <= float(layer[1]):
+                    if unit[0] == "":
+                        self.layer = layer
+                        self.unit = "Un-unitised"
+                    else:
+                        self.layer = layer
+                        self.unit = unit[0]
+                split_layer_top = str(layer).split(",")[0]
+                split_layer_bot = str(layer).split(",")[1]
+                split_layer_bot = split_layer_bot[:-1]
+                if unit[0] == "":
+                    self.geol_layers_list.append(str(f"{split_layer_top}m - {split_layer_bot}m) Soil Type: {unit[1]}"))
+                else:
+                    self.geol_layers_list.append(str(f"{split_layer_top}m - {split_layer_bot}m) Unit: {unit[0]} | Soil Type: {unit[1]}"))
+
+            return print(f"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LAYERS: {self.geol_layers_list}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~""")
+
         for (layer, unit) in self.unitised_layers.items():
             if float(depth) >= float(layer[0]) and float(depth) <= float(layer[1]):
                 if unit[0] == "":
@@ -276,13 +336,141 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.geol_layers_list.append(str(f"{split_layer_top}m - {split_layer_bot}m) Unit: {unit[0]} | Soil Type: {unit[1]}"))
 
         print(f"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-UNITISED LAYERS: {self.geol_layers_list}
+LAYERS: {self.geol_layers_list}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~""")
             
         self.geol_layers.clear()
         self.geol_layers.addItems(self.geol_layers_list)
         self.geol_layers.setEnabled(True)
 
+
+    def export_full_averages(self):
+        self.qc_dict = {}
+        self.fs_dict = {}
+        self.u2_dict = {}
+        self.qnet_dict = {}
+        self.fr_dict = {}
+        self.ic_dict = {}
+        self.change_unit()
+    
+        bhs_in_gint = [self.point_table.item(x).text() for x in range(self.point_table.count())]
+
+        for x in range(0,len(bhs_in_gint)):
+
+            query = f"SELECT * FROM STCN_DATA WHERE PointID ='{str(bhs_in_gint[x])}'"
+            self.cpt_data = pd.read_sql(query, self.gint)
+
+            if self.cpt_data.empty:
+                print(f'no cpt data for this bh: {bhs_in_gint[x]}')
+                pass
+            
+            #add true depth
+            self.cpt_data.drop(['GintRecID'], axis=1, inplace=True)
+            self.cpt_data.reset_index(inplace=True)
+            self.cpt_data.drop(columns=['index'], inplace=True)
+            self.cpt_data.insert(len(list(self.cpt_data.columns)),'true_depth','')
+            self.cpt_data['true_depth'] = self.cpt_data['Depth'] + self.cpt_data['STCN_Depth']
+            self.cpt_data['true_depth'] = self.cpt_data['true_depth'].round(2)
+            self.cpt_data.sort_values(by=['true_depth'], inplace=True)
+            self.cpt_data['true_depth'] = self.cpt_data['true_depth'].map('{:,.2f}'.format)
+            depth_float = pd.to_numeric(self.cpt_data['true_depth'])
+            self.cpt_data['true_depth'] = depth_float
+
+            #loop through each bh and add vals to dict
+            self.get_geol_layers(bh=bhs_in_gint[x], depth=None)
+
+        #build dict with keys as index - needs to use these as index for 'scalar array' error
+        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc mean (MPa)', 'qc std (MPa)'])
+        self.full_df['Borehole'] = self.full_df.index
+        self.full_df[['Borehole','Geology Layers']] = self.full_df['Borehole'].str.split('|', expand=True)
+        move_cols = ['Borehole','Geology Layers']
+        self.full_df = self.full_df[move_cols + [col for col in self.full_df.columns if col not in move_cols]]
+
+        #add in the rest of the value dictionaries into full df
+        def build_df_from_dict(y):
+            _data = [v for k,v in y.items()]
+            df = pd.DataFrame.from_dict(y, orient='index', columns=_data[0])   
+            df = df.iloc[1:]         
+            col_list = [x for x in df.columns]
+            self.full_df[col_list[0]] = df[col_list[0]]
+            self.full_df[col_list[1]] = df[col_list[1]]
+
+        build_df_from_dict(self.fs_dict)
+        build_df_from_dict(self.u2_dict)
+        build_df_from_dict(self.qnet_dict)
+        build_df_from_dict(self.fr_dict)
+        build_df_from_dict(self.ic_dict)
+
+        keep_cols = [col for col in self.full_df.columns if 'std' not in col]
+        self.full_df = self.full_df[keep_cols + [col for col in self.full_df.columns if 'std' in col]]
+
+        self.full_df.replace(to_replace=0, value=np.nan, inplace=True)
+        self.full_df.dropna(axis = 1, how="all", inplace= True)
+
+        fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
+        
+        if fname[0] == '':
+            return
+        
+        if fname[1] == 'Excel file *.xlsx':
+            self.full_df.to_excel(fname[0], sheet_name="Average CPT Values", index=False)
+
+            wb = openpyxl.load_workbook(f"{fname[0]}")
+            ws = wb.active
+            ws.insert_rows(1)
+
+            for column_cells in ws.columns:
+                column_length = max(len(str(cell.value)) for cell in column_cells)
+                column_letter = (get_column_letter(column_cells[0].column))
+                last_col = column_letter
+                ws.column_dimensions[column_letter].width = column_length * 1.15
+            ws.column_dimensions['A'].width = column_length * 1.25
+            
+            ws.merge_cells('A1:A2')
+            ws['A1'] = 'Borehole'
+            ws['A1'].font = Font(bold=True)
+            ws['A1'].alignment = Alignment(horizontal='center')
+            ws.merge_cells('B1:B2')
+            ws['B1'] = 'Geology Layers'
+            ws['B1'].font = Font(bold=True)
+            ws['B1'].alignment = Alignment(horizontal='center')
+            ws.merge_cells('C1:H1')
+            ws['C1'] = 'Mean Values'
+            ws['C1'].font = Font(bold=True) 
+            ws['C1'].alignment = Alignment(horizontal='center')
+            ws.merge_cells('I1:N1')
+            ws['I1'] = 'Standard Deviation'
+            ws['I1'].font = Font(bold=True) 
+            ws['I1'].alignment = Alignment(horizontal='center')
+
+            def set_border(ws, cell_range):
+                thin = Side(border_style="thin", color="000000")
+                for row in ws[cell_range]:
+                    for cell in row:
+                        cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+            def set_single_border(ws, cell_range):
+                thin = Side(border_style="thin", color="000000")
+                for row in ws[cell_range]:
+                    for cell in row:
+                        cell.border = Border(top=None, left=thin, right=None, bottom=None)
+
+            end_row = str(len(ws['A']))
+            border_range = 'I1:I' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'C1:C' + end_row
+            set_single_border(ws, border_range) 
+            set_border(ws, 'A1:N2')
+            head_row = ws['C3']
+            ws.freeze_panes = head_row
+
+            wb.save(f"{fname[0]}")
+
+        elif fname[1] == 'CSV *.csv':
+            self.full_df.to_csv(fname[0], index=False)
+
+        print(f"All borehole's average CPT values saved in: {fname[0]}")
+
+        return
 
     def get_avg_val(self):
         self.full_bh.setChecked(False)
@@ -465,7 +653,7 @@ Querying {self.cpt_value} at {self.cpt_depth}m from {self.bh_select}""")
         self.play_coin()
         
     def play_coin(self):
-        coin_num = np.random.randint(77)
+        coin_num = np.random.randint(177)
         if coin_num == 17:
             coin = ('assets/sounds/coin.mp3')
             coin_url = QUrl.fromLocalFile(coin)
@@ -699,6 +887,7 @@ Are you sure you want to delete this much data?''')
             self.avg_vals.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
             self.dark_mode_button.setStyleSheet(f"{self.config.get('Theme','checkbox_css_light')}")
             self.full_bh.setStyleSheet(f"{self.config.get('Theme','checkbox_css_light')}")
+            self.full_export.setStyleSheet(f"{self.config.get('Theme','button_css_sml_light')}")
             self.menubar.setStyleSheet(f"font: 10pt 'Roboto'; background: #f0f0f0; color: black;")
             self.point_table.setStyleSheet(f"{self.config.get('Theme','table_css_light')}")
             self.depth_table.setStyleSheet(f"{self.config.get('Theme','table_css_light')}")
@@ -762,6 +951,7 @@ Are you sure you want to delete this much data?''')
             self.avg_vals.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
             self.dark_mode_button.setStyleSheet(f"{self.config.get('Theme','checkbox_css')}")
             self.full_bh.setStyleSheet(f"{self.config.get('Theme','checkbox_css')}")
+            self.full_export.setStyleSheet(f"{self.config.get('Theme','button_css_sml')}")
             self.menubar.setStyleSheet(f"font: 10pt 'Roboto'; background: #353535; color: white;")
             self.point_table.setStyleSheet(f"{self.config.get('Theme','table_css')}")
             self.depth_table.setStyleSheet(f"{self.config.get('Theme','table_css')}")
@@ -780,6 +970,7 @@ Are you sure you want to delete this much data?''')
         self.button_copy_actual.setEnabled(False)
         self.avg_vals.setEnabled(False)
         self.button_copy_avg.setEnabled(False)
+        self.full_export.setEnabled(False)
 
 
     def enable_buttons(self):
@@ -790,6 +981,7 @@ Are you sure you want to delete this much data?''')
         self.button_copy_actual.setEnabled(True)
         self.button_copy_avg.setEnabled(True)
         self.avg_vals.setEnabled(True)
+        self.full_export.setEnabled(True)
 
 
     def eventFilter(self, object: QObject, event: QEvent) -> bool:
