@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+import time
 import pyqtgraph as pg
 import sys
 import os
@@ -223,85 +224,105 @@ class MainWindow(QtWidgets.QMainWindow):
     def profile(self, param, depth):
         if param.empty or depth.empty:
             return
+        if len(param) == 1:
+            return
         
-        su=list(param)
+        param=list(param)
         depth=list(depth)
 
-        inital_regression = stats.linregress(depth,su)
+        inital_regression = stats.linregress(depth,param)
 
-        mean = np.array(su).mean()
-        std = np.array(su).std()
+        if inital_regression[0] == np.nan:
+            return
+
+        mean = np.array(param).mean()
+        std = np.array(param).std()
 
         print(inital_regression)
 
         r2 = inital_regression[2]**2
-        r2_cor = (1-(1-r2)*(len(su)-1)/(len(su)-1-1))
+        r2_cor = (1-(1-r2)*(len(param)-1)/(len(param)-1-1))
         std_err_y_est = np.sqrt(1-r2_cor)*std
         slope = inital_regression[0]
         intrcpt = inital_regression[1]
 
-        print(f'standard error y estimate: {std_err_y_est[0]}')
+        print(f'standard error y estimate: {std_err_y_est}')
 
         new_dep = []
-        new_su = []
-        for y in range(0,len(su)):
-            if not (slope * depth[y] + intrcpt + std_err_y_est * 1.96)[0] <= su[y] and not (slope * depth[y] + intrcpt + std_err_y_est * 1.96)[0] <= su[y]:
+        new_param = []
+        for y in range(0,len(param)):
+            if not (slope * depth[y] + intrcpt + std_err_y_est * 1.96) <= param[y] and not (slope * depth[y] + intrcpt + std_err_y_est * 1.96) <= param[y]:
                 new_dep.append(depth[y])
-                new_su.append(su[y])
+                new_param.append(param[y])
 
-        profile = stats.linregress(new_dep,new_su)
+        profile = stats.linregress(new_dep,new_param)
 
-        std_new = np.array(new_su).std()
+        if profile[0] == np.nan:
+            print('fs profile nan?')
+            return
+
+        std_new = np.array(new_param).std()
         r2_new = profile[2]**2
-        r2_cor_new = (1-(1-r2_new)*(len(new_su)-1)/(len(new_su)-1-1))
+        r2_cor_new = (1-(1-r2_new)*(len(new_param)-1)/(len(new_param)-2))
         std_err_y_est_new = np.sqrt(1-r2_cor_new)*std_new
 
         print(f'''new linear regression on new dataset without outliers:
 {profile}''')
         print(std_err_y_est_new)
 
-        bot_lb = round(profile[0] * depth[0] + profile[1] - std_err_y_est_new * 0.68,0)
-        bot_ub = round(profile[0] * depth[0] + profile[1] + std_err_y_est_new * 0.68,0)
+        bot_lb = profile[0] * depth[0] + profile[1] - std_err_y_est_new * 0.68
+        bot_ub = profile[0] * depth[0] + profile[1] + std_err_y_est_new * 0.68
         bot_be = profile[0] * depth[0] + profile[1]
 
-        top_lb = round(profile[0] * depth[-1] + profile[1] - std_err_y_est_new * 0.68,0)
-        top_ub = round(profile[0] * depth[-1] + profile[1] + std_err_y_est_new * 0.68,0)
+        top_lb = profile[0] * depth[-1] + profile[1] - std_err_y_est_new * 0.68
+        top_ub = profile[0] * depth[-1] + profile[1] + std_err_y_est_new * 0.68
         top_be = profile[0] * depth[-1] + profile[1]
 
-        print(f'bot_lb: {bot_lb-1}')
-        print(f'bot_ub: {bot_ub-1}')
-        print(f'top_lb: {top_lb+1}')
-        print(f'top_ub: {top_ub+1}')
+        # bot_lb = bot_lb -1
+        # bot_ub = bot_ub -1
+        # top_lb = top_lb +1
+        # top_ub = top_ub +1
+
+        print(f'bot_lb: {bot_lb}')
+        print(f'bot_ub: {bot_ub}')
+        print(f'top_lb: {top_lb}')
+        print(f'top_ub: {top_ub}')
         lb = [bot_lb, top_lb]
         ub = [bot_ub, top_ub]
         be = [bot_be, top_be]
 
+        # if bot_lb == top_lb:
+        #     print(bot_lb,top_lb)
+        #     print('dis one')
+        #     time.sleep(5)
+
         #plotting
-        # plt.rcParams.update({'font.size': 8})
-        # fig, ax = plt.subplots(1, 1, figsize=(4.5,7.0))
-        # fig.canvas.manager.set_window_title('su')
-        # fig.tight_layout()
+        plt.rcParams.update({'font.size': 8})
+        fig, graph = plt.subplots(1, 1, figsize=(4.5,7.0))
+        fig.canvas.manager.set_window_title('cpt profile')
+        fig.tight_layout()
 
-        # plt.subplots_adjust(
-        # left  = 0.1,  # the left side of the subplots of the figure
-        # right = 0.925,    # the right side of the subplots of the figure
-        # bottom = 0.1,   # the bottom of the subplots of the figure
-        # top = 0.9,      # the top of the subplots of the figure
-        # wspace = 0.2,   # the amount of width reserved for blank space between subplots
-        # hspace = 0.2,   # the amount of height reserved for white space between subplots
-        # )
+        plt.subplots_adjust(
+        left  = 0.1,  # the left side of the subplots of the figure
+        right = 0.925,    # the right side of the subplots of the figure
+        bottom = 0.1,   # the bottom of the subplots of the figure
+        top = 0.9,      # the top of the subplots of the figure
+        wspace = 0.2,   # the amount of width reserved for blank space between subplots
+        hspace = 0.2,   # the amount of height reserved for white space between subplots
+        )
 
-        # ax.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
-        # ax.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
-        # ax.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
-        # ax.title.set_text(f'{self.bh}')
+        graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
+        graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
+        graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
+        graph.title.set_text(f'{self.bh}')
 
-        # ax.scatter(su, depth, s=12, color = 'b', label = 'Su')
-        # ax.invert_yaxis()
-        # ax.legend()
-        # ax.set_ylabel('depth (m)')
-        # ax.set_xlabel('su (kPa)', loc='left')
-        # plt.show()
+        graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
+        graph.invert_yaxis()
+        graph.legend()
+        graph.set_ylabel('depth (m)')
+        graph.set_xlabel('qc (kPa)', loc='left')
+        plt.show()
+        QApplication.processEvents()
         return be
 
     def change_unit(self):
@@ -380,15 +401,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ic_dict[f'Layers'] = ['ic mean (-)','ic std (-)']
 
                 qc_be = self.profile(param=qc_list['STCN_QC'], depth=qc_list['true_depth'])
-                qc_be = [None, None] if qc_be == None else qc_be
-                fs_be = self.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'])
-                fs_be = [None, None] if fs_be == None else fs_be
-                u2_be = self.profile(param=u2_list['STCN_U'], depth=qc_list['true_depth'])
-                u2_be = [None, None] if u2_be == None else u2_be
+                qc_be = [None,None] if qc_be == None else qc_be
+                # fs_be = self.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'])
+                # fs_be = [None, None] if fs_be == None else fs_be
+                #u2_be = self.profile(param=u2_list['STCN_U'], depth=qc_list['true_depth'])
+                #u2_be = [None, None] if u2_be == None else u2_be
+                # ic_be = self.profile(param=ic_list['STCN_SBTi'], depth=qc_list['true_depth'])
+                # ic_be = [None,None] if ic_be == None else ic_be
 
-                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std(),F"{qc_be[0]}, {qc_be[1]}"]
-                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list.mean(),fs_list.std(),F"{fs_be[0]}, {fs_be[1]}"]
-                self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list.mean(),u2_list.std(),F"{u2_be[0]}, {u2_be[1]}"]
+                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]#,F"{qc_be[0]}, {qc_be[1]}"]
+                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list.mean(),fs_list.std()]#,F"{fs_be[0]}, {fs_be[1]}"]
+                self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list.mean(),u2_list.std()]#,F"{u2_be[0]}, {u2_be[1]}"]
                 self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list.mean(),qnet_list.std()]
                 self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fr_list.mean(),fr_list.std()]
                 self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [ic_list.mean(),ic_list.std()]
@@ -501,7 +524,7 @@ LAYERS: {self.geol_layers_list}
         self.full_df = self.full_df[keep_cols + [col for col in self.full_df.columns if 'std' in col]]
 
         self.full_df.replace(to_replace=0, value=np.nan, inplace=True)
-        self.full_df.replace({'None, None': np.nan}, inplace=True) 
+        self.full_df.replace({f'{[None, None]}': np.nan}, inplace=True) 
         self.full_df.dropna(axis = 1, how="all", inplace= True)
 
         fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
