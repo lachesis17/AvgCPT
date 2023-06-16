@@ -294,31 +294,31 @@ class MainWindow(QtWidgets.QMainWindow):
         #     time.sleep(5)
 
         #plotting
-        plt.rcParams.update({'font.size': 8})
-        fig, graph = plt.subplots(1, 1, figsize=(4.5,7.0))
-        fig.canvas.manager.set_window_title('cpt profile')
-        fig.tight_layout()
+        # plt.rcParams.update({'font.size': 8})
+        # fig, graph = plt.subplots(1, 1, figsize=(4.5,7.0))
+        # fig.canvas.manager.set_window_title('cpt profile')
+        # fig.tight_layout()
 
-        plt.subplots_adjust(
-        left  = 0.1,
-        right = 0.925,
-        bottom = 0.1,
-        top = 0.9,
-        wspace = 0.2,
-        hspace = 0.2,
-        )
+        # plt.subplots_adjust(
+        # left  = 0.1,
+        # right = 0.925,
+        # bottom = 0.1,
+        # top = 0.9,
+        # wspace = 0.2,
+        # hspace = 0.2,
+        # )
 
-        graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
-        graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
-        graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
-        graph.title.set_text(f'{name}')
+        # graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
+        # graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
+        # graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
+        # graph.title.set_text(f'{name}')
 
-        graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
-        graph.invert_yaxis()
-        graph.legend()
-        graph.set_ylabel('depth (m)')
-        graph.set_xlabel('qc (kPa)', loc='left')
-        plt.show()
+        # graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
+        # graph.invert_yaxis()
+        # graph.legend()
+        # graph.set_ylabel('depth (m)')
+        # graph.set_xlabel('qc (kPa)', loc='left')
+        # plt.show()
         QApplication.processEvents()
         return be
 
@@ -406,12 +406,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 # ic_be = self.profile(param=ic_list['STCN_SBTi'], depth=qc_list['true_depth'])
                 # ic_be = [None,None] if ic_be == None else ic_be
 
-                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std(),F"{qc_be[0]}, {qc_be[1]}"]
-                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list.mean(),fs_list.std()]#,F"{fs_be[0]}, {fs_be[1]}"]
-                self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list.mean(),u2_list.std()]#,F"{u2_be[0]}, {u2_be[1]}"]
-                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list.mean(),qnet_list.std()]
-                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fr_list.mean(),fr_list.std()]
-                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [ic_list.mean(),ic_list.std()]
+                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_be[0]}, {qc_be[1]}", qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
+                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list['STCN_FS'].mean(),fs_list['STCN_FS'].std()]#,F"{fs_be[0]}, {fs_be[1]}"]
+                self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list['STCN_U'].mean(),u2_list['STCN_U'].std()]#,F"{u2_be[0]}, {u2_be[1]}"]
+                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list['STCN_Qnet'].mean(),qnet_list['STCN_Qnet'].std()]
+                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fr_list['STCN_FCRO'].mean(),fr_list['STCN_FCRO'].std()]
+                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [ic_list['STCN_SBTi'].mean(),ic_list['STCN_SBTi'].std()]
 
                 if float(depth) >= float(layer[0]) and float(depth) <= float(layer[1]):
                     if unit[0] == "":
@@ -495,7 +495,7 @@ LAYERS: {self.geol_layers_list}
             self.get_geol_layers(bh=bhs_in_gint[x], depth=None)
 
         #build dict with keys as index - needs to use these as index for 'scalar array' error
-        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc mean (MPa)', 'qc std (MPa)', 'qc Best Estimate (Bot, Top)'])
+        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc Best Estimate (Bot, Top)', 'qc mean (MPa)', 'qc std (MPa)'])
         self.full_df['Borehole'] = self.full_df.index
         self.full_df[['Borehole','Geology Layers']] = self.full_df['Borehole'].str.split('|', expand=True)
         move_cols = ['Borehole','Geology Layers']
@@ -521,7 +521,7 @@ LAYERS: {self.geol_layers_list}
         self.full_df = self.full_df[keep_cols + [col for col in self.full_df.columns if 'std' in col]]
 
         self.full_df.replace(to_replace=0, value=np.nan, inplace=True)
-        self.full_df.replace({f'{[None, None]}': np.nan}, inplace=True) 
+        self.full_df.replace(to_replace="None, None", value=np.nan, inplace=True) 
         self.full_df.dropna(axis = 1, how="all", inplace= True)
 
         fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
