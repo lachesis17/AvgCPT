@@ -221,24 +221,27 @@ class MainWindow(QtWidgets.QMainWindow):
 {self.geol_unit}</p>''')
             
 
-    def profile(self, param, depth):
+    '''PROFILE'''
+            
+
+    def profile(self, param, depth, name):
         if param.empty or depth.empty:
             return
         if len(param) == 1:
             return
         
-        param=list(param)
-        depth=list(depth)
+        param = np.array(param)
+        depth = np.array(depth)
 
         inital_regression = stats.linregress(depth,param)
 
         if inital_regression[0] == np.nan:
             return
 
-        mean = np.array(param).mean()
         std = np.array(param).std()
 
-        print(inital_regression)
+        print(f'''initial regression:
+{inital_regression}''')
 
         r2 = inital_regression[2]**2
         r2_cor = (1-(1-r2)*(len(param)-1)/(len(param)-1-1))
@@ -278,15 +281,9 @@ class MainWindow(QtWidgets.QMainWindow):
         top_ub = profile[0] * depth[-1] + profile[1] + std_err_y_est_new * 0.68
         top_be = profile[0] * depth[-1] + profile[1]
 
-        # bot_lb = bot_lb -1
-        # bot_ub = bot_ub -1
-        # top_lb = top_lb +1
-        # top_ub = top_ub +1
-
-        print(f'bot_lb: {bot_lb}')
-        print(f'bot_ub: {bot_ub}')
-        print(f'top_lb: {top_lb}')
-        print(f'top_ub: {top_ub}')
+        print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+        print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+        print(f'BE | Lower: {bot_be}, Upper: {top_be}')
         lb = [bot_lb, top_lb]
         ub = [bot_ub, top_ub]
         be = [bot_be, top_be]
@@ -303,18 +300,18 @@ class MainWindow(QtWidgets.QMainWindow):
         fig.tight_layout()
 
         plt.subplots_adjust(
-        left  = 0.1,  # the left side of the subplots of the figure
-        right = 0.925,    # the right side of the subplots of the figure
-        bottom = 0.1,   # the bottom of the subplots of the figure
-        top = 0.9,      # the top of the subplots of the figure
-        wspace = 0.2,   # the amount of width reserved for blank space between subplots
-        hspace = 0.2,   # the amount of height reserved for white space between subplots
+        left  = 0.1,
+        right = 0.925,
+        bottom = 0.1,
+        top = 0.9,
+        wspace = 0.2,
+        hspace = 0.2,
         )
 
         graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
         graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
         graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
-        graph.title.set_text(f'{self.bh}')
+        graph.title.set_text(f'{name}')
 
         graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
         graph.invert_yaxis()
@@ -400,7 +397,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fr_dict[f'Layers'] = ['fr mean (-)','fr std (-)']
                 self.ic_dict[f'Layers'] = ['ic mean (-)','ic std (-)']
 
-                qc_be = self.profile(param=qc_list['STCN_QC'], depth=qc_list['true_depth'])
+                qc_be = self.profile(param=qc_list['STCN_QC'], depth=qc_list['true_depth'], name = f'qc - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
                 qc_be = [None,None] if qc_be == None else qc_be
                 # fs_be = self.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'])
                 # fs_be = [None, None] if fs_be == None else fs_be
@@ -409,7 +406,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 # ic_be = self.profile(param=ic_list['STCN_SBTi'], depth=qc_list['true_depth'])
                 # ic_be = [None,None] if ic_be == None else ic_be
 
-                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]#,F"{qc_be[0]}, {qc_be[1]}"]
+                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std(),F"{qc_be[0]}, {qc_be[1]}"]
                 self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fs_list.mean(),fs_list.std()]#,F"{fs_be[0]}, {fs_be[1]}"]
                 self.u2_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [u2_list.mean(),u2_list.std()]#,F"{u2_be[0]}, {u2_be[1]}"]
                 self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list.mean(),qnet_list.std()]
