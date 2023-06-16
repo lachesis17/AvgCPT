@@ -7,9 +7,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():
     def profile(param, depth, name):
-        if param.empty or depth.empty:
-            return
-        if len(param) == 1:
+        if param.empty or depth.empty or len(param) <= 2:
             return
         
         param = np.array(param)
