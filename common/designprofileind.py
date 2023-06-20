@@ -62,9 +62,6 @@ class DesignProfile():
         std_err_y_est_new_DEP = np.sqrt(1-r2_cor_new_DEP)*std_new_DEP
 
 
-        print(f"mean - std: {mean - std * 1.96}")
-        print(f"mean + std: {mean + std * 1.96}")
-
         '''independent model'''
 
         depth_IND = []
@@ -74,81 +71,58 @@ class DesignProfile():
                 depth_IND.append(depth[y])
                 param_IND.append(param[y])
 
-        if not param_IND == [] and not len(param_IND) <= 2:
-            mean_new_IND = np.array(param_IND).mean()
-            std_new_IND = np.array(param_IND).std()
+        mean_new_IND = np.array(param_IND).mean()
+        std_new_IND = np.array(param_IND).std()
 
-            profile_IND = [mean_new_IND, std_new_IND]
+        profile_IND = [mean_new_IND, std_new_IND]
 
-            '''determine best model'''
-            if std_new_IND < std_new_DEP:
-                model = "INDEPENDANT"
-                print(f'''~INDEPENDANT~
+        '''determine best model'''
+
+        if std_new_IND < std_new_DEP:
+            model = "INDEPENDANT"
+            print(f'''~INDEPENDANT~
 independant mean and standard deviation:
 {profile_IND}''')
-                
-                bot_lb = profile_IND[0] - profile_IND[1] * z_value_70
-                bot_ub = profile_IND[0] + profile_IND[1] * z_value_70
-                bot_be = profile_IND[0] 
+            
+            bot_lb = profile_IND[0] - profile_IND[1] * z_value_70
+            bot_ub = profile_IND[0] + profile_IND[1] * z_value_70
+            bot_be = profile_IND[0] 
 
-                top_lb = profile_IND[0] - profile_IND[1] * z_value_70
-                top_ub = profile_IND[0] + profile_IND[1] * z_value_70
-                top_be = profile_IND[0] 
+            top_lb = profile_IND[0] - profile_IND[1] * z_value_70
+            top_ub = profile_IND[0] + profile_IND[1] * z_value_70
+            top_be = profile_IND[0] 
 
-                print('------------------------------------------')
-                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
-                print('------------------------------------------')
-                lb = [bot_lb, top_lb]
-                ub = [bot_ub, top_ub]
-                be = [bot_be, top_be]
-
-            else:
-                model = "DEPENDANT"
-                print(f'''~DEPENDANT~
-new linear regression on new dataset without outliers:
-{profile_DEP}''')
-
-                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
-                bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
-
-                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
-                top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
-
-                print('------------------------------------------')
-                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
-                print('------------------------------------------')
-                lb = [bot_lb, top_lb]
-                ub = [bot_ub, top_ub]
-                be = [bot_be, top_be]
+            print('------------------------------------------')
+            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+            print('------------------------------------------')
+            lb = [bot_lb, top_lb]
+            ub = [bot_ub, top_ub]
+            be = [bot_be, top_be]
 
         else:
-                model = "DEPENDANT"
-                print(f'''~DEPENDANT~
+            model = "DEPENDANT"
+            print(f'''~DEPENDANT~
 new linear regression on new dataset without outliers:
 {profile_DEP}''')
 
-                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
-                bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
+            bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+            bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
+            bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
-                top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+            top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+            top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
+            top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
-                print('------------------------------------------')
-                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
-                print('------------------------------------------')
-                lb = [bot_lb, top_lb]
-                ub = [bot_ub, top_ub]
-                be = [bot_be, top_be]
+            print('------------------------------------------')
+            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+            print('------------------------------------------')
+            lb = [bot_lb, top_lb]
+            ub = [bot_ub, top_ub]
+            be = [bot_be, top_be]
 
 
 
