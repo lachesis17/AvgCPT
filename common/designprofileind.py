@@ -36,6 +36,14 @@ class DesignProfile():
         print(f'standard error y estimate: {std_err_y_est}')
 
 
+#Setting up the z value for Lower Bound and Upper Bound, for any given quantile / percentile (Table of the normal distribution)
+# (30%,70% OR 25%,75% OR 10%,90% OR 5%,95%)
+
+        z_value_70 = 0.53
+        z_value_75 = 0.68
+        z_value_90 = 1.29
+        z_value_95 = 1.65
+
         '''dependent model'''
 
         depth_DEP = []
@@ -62,33 +70,29 @@ class DesignProfile():
         depth_IND = []
         param_IND = []
         for y in range(0,len(param)):
-            if not (mean - std * 1.96) <= param[y] and not (mean + std * 1.96) <= param[y]:
+            if (mean - std * 1.96) <= param[y] and param[y] <= (mean + std * 1.96):
                 depth_IND.append(depth[y])
                 param_IND.append(param[y])
 
         if not param_IND == [] and not len(param_IND) <= 2:
-            profile_IND = sc.stats.linregress(depth_IND,param_IND)
-
             mean_new_IND = np.array(param_IND).mean()
             std_new_IND = np.array(param_IND).std()
-            r2_new_IND = profile_IND[2]**2
-            print(len(param_IND))
-            r2_cor_new_IND = (1-(1-r2_new_IND)*(len(param_IND)-1)/(len(param_IND)-2))
-            std_err_y_est_new_IND = np.sqrt(1-r2_cor_new_IND)*std_new_IND
+
+            profile_IND = [mean_new_IND, std_new_IND]
 
             '''determine best model'''
             if std_new_IND < std_new_DEP:
                 model = "INDEPENDANT"
                 print(f'''~INDEPENDANT~
-    new linear regression on new dataset without outliers:
-    {profile_IND}''')
+independant mean and standard deviation:
+{profile_IND}''')
                 
-                bot_lb = profile_IND[0] - profile_IND[1] * 0.68
-                bot_ub = profile_IND[0] + profile_IND[1] * 0.68
+                bot_lb = profile_IND[0] - profile_IND[1] * z_value_70
+                bot_ub = profile_IND[0] + profile_IND[1] * z_value_70
                 bot_be = profile_IND[0] 
 
-                top_lb = profile_IND[0] - profile_IND[1] * 0.68
-                top_ub = profile_IND[0] + profile_IND[1] * 0.68
+                top_lb = profile_IND[0] - profile_IND[1] * z_value_70
+                top_ub = profile_IND[0] + profile_IND[1] * z_value_70
                 top_be = profile_IND[0] 
 
                 print('------------------------------------------')
@@ -103,15 +107,15 @@ class DesignProfile():
             else:
                 model = "DEPENDANT"
                 print(f'''~DEPENDANT~
-        new linear regression on new dataset without outliers:
-        {profile_DEP}''')
+new linear regression on new dataset without outliers:
+{profile_DEP}''')
 
-                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * 0.68
-                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * 0.68
+                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
                 bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * 0.68
-                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * 0.68
+                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
                 top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
                 print('------------------------------------------')
@@ -126,15 +130,15 @@ class DesignProfile():
         else:
                 model = "DEPENDANT"
                 print(f'''~DEPENDANT~
-        new linear regression on new dataset without outliers:
-        {profile_DEP}''')
+new linear regression on new dataset without outliers:
+{profile_DEP}''')
 
-                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * 0.68
-                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * 0.68
+                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
                 bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * 0.68
-                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * 0.68
+                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
+                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
                 top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
                 print('------------------------------------------')

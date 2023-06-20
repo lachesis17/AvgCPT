@@ -30,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        uic.loadUi("assets/ui/mainwindow.ui", self)
+        uic.loadUi("assets/ui/mainwindow - copy.ui", self)
         self.setWindowIcon(QtGui.QIcon('assets/images/icon.ico'))
     
         self.player = QMediaPlayer()
@@ -304,7 +304,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 qc_profile = [[None,None],[None,None],[None,None]] if qc_profile == None else qc_profile
                 #print(f'be bot {qc_profile[0][0]} be top {qc_profile[0][1]} lb bot {qc_profile[1][0]} lb top {qc_profile[1][1]} ub bot {qc_profile[2][0]} ub top {qc_profile[2][1]}')
 
-                # fs_be = self.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'], name = f'fs (MPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
+                # fs_be = DesignProfile.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'], name = f'fs (MPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
                 # fs_be = [[None,None],[None,None],[None,None]] if fs_be == None else fs_be
 
                 # u_be = self.profile(param=u_list['STCN_U'], depth=qc_list['true_depth'], name = f'u (kPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
@@ -877,6 +877,7 @@ Are you sure you want to delete this much data?''')
             
             light_palette = QPalette()
             light_palette.setColor(QPalette.Window, QColor(240, 240, 240))
+            light_palette.setColor(QPalette.Background, QColor('#f0f0f0'))
             light_palette.setColor(QPalette.WindowText, Qt.black)
             light_palette.setColor(QPalette.Base, QColor(240, 240, 240))
             light_palette.setColor(QPalette.AlternateBase, QColor(240, 240, 240))
@@ -894,6 +895,7 @@ Are you sure you want to delete this much data?''')
             light_palette.setColor(QPalette.Disabled, QPalette.WindowText, Qt.lightGray)
             light_palette.setColor(QPalette.Disabled, QPalette.Text, Qt.lightGray)
             light_palette.setColor(QPalette.Disabled, QPalette.Light, QColor('#f0f0f0'))
+            self.tabgroup.setStyleSheet(f"{self.config.get('Theme','tab_css')}")
             self.left_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css_light')}")
             self.top_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css_light')}")
             self.top_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css_light')}")
@@ -941,6 +943,8 @@ Are you sure you want to delete this much data?''')
 
             dark_palette = QPalette()
             dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
+            dark_palette.setColor(QPalette.Background, QColor('#353535'))
+            dark_palette.setColor(QPalette.Foreground, QColor('#353535'))
             dark_palette.setColor(QPalette.WindowText, Qt.black)
             dark_palette.setColor(QPalette.Base, QColor(35, 35, 35))
             dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
@@ -958,6 +962,7 @@ Are you sure you want to delete this much data?''')
             dark_palette.setColor(QPalette.Disabled, QPalette.WindowText, Qt.darkGray)
             dark_palette.setColor(QPalette.Disabled, QPalette.Text, Qt.darkGray)
             dark_palette.setColor(QPalette.Disabled, QPalette.Light, QColor(53, 53, 53))
+            self.tabgroup.setStyleSheet(f"{self.config.get('Theme','tab_css_dark')}")
             self.left_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css')}")
             self.top_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css')}")
             self.top_spacer.setStyleSheet(f"{self.config.get('Theme','spacer_css')}")
