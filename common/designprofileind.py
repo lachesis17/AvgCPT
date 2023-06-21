@@ -7,11 +7,25 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():
-    def profile(param, depth, name):
+    def profile(param, depth, name, model, zvalue):
         if param.empty or depth.empty:
             return
         if len(param) == 1:
             return
+        
+        if zvalue == 70:
+            z_val = 0.53
+        if zvalue == 75:
+            z_val = 0.68
+        if zvalue == 90:
+            z_val = 1.29
+        if zvalue == 95:
+            z_val = 1.65
+
+        # z_value_70 = 0.53
+        # z_value_75 = 0.68
+        # z_value_90 = 1.29
+        # z_value_95 = 1.65
         
         param = np.array(param)
         depth = np.array(depth)
@@ -39,10 +53,6 @@ class DesignProfile():
 #Setting up the z value for Lower Bound and Upper Bound, for any given quantile / percentile (Table of the normal distribution)
 # (30%,70% OR 25%,75% OR 10%,90% OR 5%,95%)
 
-        z_value_70 = 0.53
-        z_value_75 = 0.68
-        z_value_90 = 1.29
-        z_value_95 = 1.65
 
         '''dependent model'''
 
@@ -78,41 +88,18 @@ class DesignProfile():
 
         '''determine best model'''
 
-        if std_new_IND < std_new_DEP:
-            model = "INDEPENDANT"
-            print(f'''~INDEPENDANT~
-independant mean and standard deviation:
-{profile_IND}''')
-            
-            bot_lb = profile_IND[0] - profile_IND[1] * z_value_70
-            bot_ub = profile_IND[0] + profile_IND[1] * z_value_70
-            bot_be = profile_IND[0] 
-
-            top_lb = profile_IND[0] - profile_IND[1] * z_value_70
-            top_ub = profile_IND[0] + profile_IND[1] * z_value_70
-            top_be = profile_IND[0] 
-
-            print('------------------------------------------')
-            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
-            print('------------------------------------------')
-            lb = [bot_lb, top_lb]
-            ub = [bot_ub, top_ub]
-            be = [bot_be, top_be]
-
-        else:
-            model = "DEPENDANT"
+        if model == "DEP":
+            mode = "DEPENDANT"
             print(f'''~DEPENDANT~
 new linear regression on new dataset without outliers:
 {profile_DEP}''')
 
-            bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-            bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
+            bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+            bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
             bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-            top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_value_70
-            top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_value_70
+            top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+            top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
             top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
             print('------------------------------------------')
@@ -124,6 +111,75 @@ new linear regression on new dataset without outliers:
             ub = [bot_ub, top_ub]
             be = [bot_be, top_be]
 
+        if model == "IND":
+            mode = "INDEPENDANT"
+            print(f'''~INDEPENDANT~
+independant mean and standard deviation:
+{profile_IND}''')
+            
+            bot_lb = profile_IND[0] - profile_IND[1] * z_val
+            bot_ub = profile_IND[0] + profile_IND[1] * z_val
+            bot_be = profile_IND[0] 
+
+            top_lb = profile_IND[0] - profile_IND[1] * z_val
+            top_ub = profile_IND[0] + profile_IND[1] * z_val
+            top_be = profile_IND[0] 
+
+            print('------------------------------------------')
+            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+            print('------------------------------------------')
+            lb = [bot_lb, top_lb]
+            ub = [bot_ub, top_ub]
+            be = [bot_be, top_be]
+
+
+        if model == "AUTO":
+            if std_new_IND < std_new_DEP:
+                mode = "INDEPENDANT"
+                print(f'''~INDEPENDANT~
+    independant mean and standard deviation:
+    {profile_IND}''')
+                
+                bot_lb = profile_IND[0] - profile_IND[1] * z_val
+                bot_ub = profile_IND[0] + profile_IND[1] * z_val
+                bot_be = profile_IND[0] 
+
+                top_lb = profile_IND[0] - profile_IND[1] * z_val
+                top_ub = profile_IND[0] + profile_IND[1] * z_val
+                top_be = profile_IND[0] 
+
+                print('------------------------------------------')
+                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+                print('------------------------------------------')
+                lb = [bot_lb, top_lb]
+                ub = [bot_ub, top_ub]
+                be = [bot_be, top_be]
+            else:
+                mode = "DEPENDANT"
+                print(f'''~DEPENDANT~
+    new linear regression on new dataset without outliers:
+    {profile_DEP}''')
+
+                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+                bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
+
+                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+                top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+
+                print('------------------------------------------')
+                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
+                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
+                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+                print('------------------------------------------')
+                lb = [bot_lb, top_lb]
+                ub = [bot_ub, top_ub]
+                be = [bot_be, top_be]
 
 
         #plotting
@@ -146,7 +202,7 @@ new linear regression on new dataset without outliers:
         graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
         graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
         graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
-        graph.title.set_text(f'{name} - {model}')
+        graph.title.set_text(f'{name} - {mode}')
 
         graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
         graph.invert_yaxis()
