@@ -16,7 +16,7 @@ import statistics
 import numpy as np
 import configparser
 import openpyxl
-from common.designprofileind import DesignProfile
+from common.designprofile import DesignProfile
 from scipy import stats
 from matplotlib import pyplot as plt
 from openpyxl.styles import Font, Alignment, Border, Side
@@ -300,7 +300,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fr_dict[f'Layers'] = ['fr profile','fr mean (-)','fr std (-)']
                 self.ic_dict[f'Layers'] = ['ic profile','ic mean (-)','ic std (-)']
 
-                qc_profile = DesignProfile.profile(param=qc_list['STCN_QC'], depth=qc_list['true_depth'], name = f'qc (kPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}', model="AUTO", zvalue=75)
+                qc_profile = DesignProfile.profile(
+                    param=qc_list['STCN_QC'], 
+                    depth=qc_list['true_depth'], 
+                    name = f'qc (kPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}', 
+                    model="AUTO", 
+                    zvalue=75, 
+                    plot=False)
                 qc_profile = [[None,None],[None,None],[None,None]] if qc_profile == None else qc_profile
                 #print(f'be bot {qc_profile[0][0]} be top {qc_profile[0][1]} lb bot {qc_profile[1][0]} lb top {qc_profile[1][1]} ub bot {qc_profile[2][0]} ub top {qc_profile[2][1]}')
 
