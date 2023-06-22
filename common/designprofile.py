@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import math
 import scipy as sc
 import sys
+import pandas as pd
 sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():    
@@ -22,12 +23,14 @@ class DesignProfile():
         model : str = "DEP", "IND", "AUTO"
 
             "DEP" : for Dependant model, removes outliers of (x) data with linear regression and depth (y) with:
-            slope * depth + intercept + standard error of y estimate * 1.96
+            slope * depth + intercept -/+ standard error of y estimate * 1.96
 
             "IND" : for Independant model, removes outliers of (x) data with mean and standard deviation with:
             mean -/+ standard deviation * 1.96
 
             "AUTO" : selects model based on the lesser standard deviation of both models
+
+            -/+ used to determine lower/upper bounds
 
         zvalue : int = 70, 75, 90, 95
 
@@ -43,10 +46,8 @@ class DesignProfile():
 
         plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
             """
-
-        if param.empty or depth.empty:
-            return
-        if len(param) == 1:
+        
+        if len(param) <= 2:
             return
         
         if zvalue == 70:
@@ -84,12 +85,8 @@ class DesignProfile():
 
         '''dependent model'''
 
-        depth_DEP = []
-        param_DEP = []
-        for y in range(0,len(param)):
-            if not (slope * depth[y] + intrcpt + std_err_y_est * 1.96) <= param[y] and not (slope * depth[y] + intrcpt + std_err_y_est * 1.96) <= param[y]:
-                depth_DEP.append(depth[y])
-                param_DEP.append(param[y])
+        param_DEP = [param for iter,(param,depth) in enumerate(zip(param,depth)) if param >= (slope * depth + intrcpt - std_err_y_est * 1.96) and param <= (slope * depth + intrcpt + std_err_y_est * 1.96)]
+        depth_DEP = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if param >= (slope * depth + intrcpt - std_err_y_est * 1.96) and param <= (slope * depth + intrcpt + std_err_y_est * 1.96)]
 
         profile_DEP = sc.stats.linregress(depth_DEP,param_DEP) # new dataset with outliers removed
 
@@ -103,12 +100,7 @@ class DesignProfile():
 
         '''independent model'''
 
-        depth_IND = []
-        param_IND = []
-        for y in range(0,len(param)):
-            if (mean - std * 1.96) <= param[y] and param[y] <= (mean + std * 1.96):
-                depth_IND.append(depth[y])
-                param_IND.append(param[y])
+        param_IND = [param for iter,(param,depth) in enumerate(zip(param,depth)) if param >= (mean - std * 1.96) and param <= (mean + std * 1.96)]
 
         mean_new_IND = np.array(param_IND).mean() # new mean on dataset with outliers removed
         std_new_IND = np.array(param_IND).std() # new standard deviations on dataset with outliers removed
