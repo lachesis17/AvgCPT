@@ -221,8 +221,8 @@ new linear regression on new dataset without outliers:
     def plotting(depth, param, lb, ub, be, name, mode):
 
         plt.rcParams.update({'font.size': 8})
-        fig, graph = plt.subplots(1, 1, figsize=(5.5,10.0))
-        fig.canvas.manager.set_window_title('cpt profile')
+        fig, graph = plt.subplots(1, 1, figsize=(5.5,9.5))
+        fig.canvas.manager.set_window_title('Profile Lines')
         fig.tight_layout()
 
         plt.subplots_adjust(left  = 0.1, right = 0.925, bottom = 0.1, top = 0.9, wspace = 0.2, hspace = 0.2)
@@ -232,15 +232,13 @@ new linear regression on new dataset without outliers:
         graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
         graph.title.set_text(f'{name} - {mode}')
 
-        graph.scatter(param, depth, s=12, color = 'b', label = 'IS50')
+        graph.scatter(param, depth, s=12, color = 'b', label = 'V/s')
         graph.invert_yaxis()
         graph.legend()
-        graph.set_ylabel('depth (m)')
+        graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("-")[0]}', loc='center')
         plt.show()
 
-
-    # def plotting(depth, param, lb, ub, be, name, mode):
     #     # def move_line(event):
     #     #     if move_best == True:
     #     #         print(best[0].get_xdata())
@@ -251,34 +249,12 @@ new linear regression on new dataset without outliers:
     #     #         lower[0].set_xdata(new_low)
     #     #         upper[0].set_xdata(new_upp)
     #     #         fig.canvas.draw()
-
-    #     plt.rcParams.update({'font.size': 8})
-    #     fig, graph = plt.subplots(1, 1, figsize=(5,7.0))
-    #     # fig.canvas.mpl_connect('button_press_event', move_line)
-    #     fig.canvas.manager.set_window_title('cpt profile')
-    #     fig.tight_layout()
-
-    #     plt.subplots_adjust(left  = 0.1, right = 0.925, bottom = 0.1, top = 0.9, wspace = 0.2, hspace = 0.2)
-
-    #     lower = graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
-    #     upper = graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
-    #     best = graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
     #     move_best = True
-    #     graph.title.set_text(f'{name} - {mode}')
+    #     # fig.canvas.mpl_connect('button_press_event', move_line)
 
-    #     graph.scatter(param, depth, s=12, color = 'b', label = 'qc')
-    #     graph.invert_yaxis()
-    #     graph.legend()
-    #     graph.set_ylabel('depth (m)')
-    #     graph.set_xlabel(f'{str(name).split("-")[0]}', loc='left')
-    #     plt.show()
-
-
-
-df = pd.read_excel("50.xlsx", sheet_name="IS50")
-df = df.sort_values(by=['depth'])
-#df.dropna(axis=df['LNMC_MC'], inplace=True)
-#df['LNMC_MC'] = df['LNMC_MC'].astype(int, errors="ignore")
+#TESTING
+df = pd.read_excel("50.xlsx", sheet_name="RESV")
+df = df.sort_values(by=['Depth'])
 df.reset_index(inplace=True)
 
-DesignProfile.profile(param=df['is50'], depth=df['depth'], name="IS50", model="AUTO", zvalue=75, plot=True)
+DesignProfile.profile(param=df['RESV_SWV'], depth=df['Depth'], name="Resonant Column Shear Wave Velocity", model="DEP", zvalue=90, plot=True)
