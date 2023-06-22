@@ -49,16 +49,9 @@ class DesignProfile():
 
         if len(param) <= 2:
             return
-        
 
-        param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not str(param) == "nan"]
-        depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not str(param) == "nan"]
-
-        print(param)
-        print(depth)
-
-        # param = [x + "," for x in param]
-        # depth = [x + "," for x in depth]
+        param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+        depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
 
         if zvalue == 70:
             z_val = 0.53
@@ -72,7 +65,8 @@ class DesignProfile():
         param = np.array(param)
         depth = np.array(depth)
 
-
+        print(param)
+        print(depth)
 
         inital_regression = sc.stats.linregress(depth,param)
 
@@ -227,7 +221,7 @@ new linear regression on new dataset without outliers:
     def plotting(depth, param, lb, ub, be, name, mode):
 
         plt.rcParams.update({'font.size': 8})
-        fig, graph = plt.subplots(1, 1, figsize=(5,7.0))
+        fig, graph = plt.subplots(1, 1, figsize=(5.5,10.0))
         fig.canvas.manager.set_window_title('cpt profile')
         fig.tight_layout()
 
@@ -242,7 +236,7 @@ new linear regression on new dataset without outliers:
         graph.invert_yaxis()
         graph.legend()
         graph.set_ylabel('depth (m)')
-        graph.set_xlabel(f'{str(name).split("-")[0]}', loc='left')
+        graph.set_xlabel(f'{str(name).split("-")[0]}', loc='center')
         plt.show()
 
 
@@ -281,10 +275,10 @@ new linear regression on new dataset without outliers:
 
 
 
-df = pd.read_excel("50.xlsx", sheet_name="RPLT")
-df = df.sort_values(by=['Depth'])
+df = pd.read_excel("50.xlsx", sheet_name="IS50")
+df = df.sort_values(by=['depth'])
 #df.dropna(axis=df['LNMC_MC'], inplace=True)
 #df['LNMC_MC'] = df['LNMC_MC'].astype(int, errors="ignore")
 df.reset_index(inplace=True)
 
-DesignProfile.profile(param=df['RPLT_PLSI'], depth=df['Depth'], name="IS50 (kPa) -", model="AUTO", zvalue=70, plot=True)
+DesignProfile.profile(param=df['is50'], depth=df['depth'], name="IS50", model="AUTO", zvalue=75, plot=True)

@@ -3,7 +3,9 @@ common/__pycache__
 *.ags
 *.gpj
 *.xlsx
+*.xlsm
 *.csv
 *.zip
 *.ldb
 *.bak
+*.png
