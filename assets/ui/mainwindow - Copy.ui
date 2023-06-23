@@ -62,13 +62,7 @@
        <bool>false</bool>
       </property>
       <property name="styleSheet">
-       <string notr="true">QTabWidget {
-	background: #f0f0f0;
-}
-
-QWidget {
-	background: #f0f0f0;
-}</string>
+       <string notr="true"/>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -1087,8 +1081,7 @@ QPushButton:hover { /* italicize selected tabs */
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Export All BHs:
-qc, fs, u, qnet, fr, ic</string>
+               <string>Export full CPT Profile</string>
               </property>
              </widget>
             </item>

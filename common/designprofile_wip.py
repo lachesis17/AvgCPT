@@ -4,6 +4,7 @@ import math
 import scipy as sc
 import sys
 import pandas as pd
+import os
 sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():    
@@ -32,41 +33,138 @@ class DesignProfile():
 
             -/+ used to determine lower/upper bounds
 
-        zvalue : int = 70, 75, 90, 95
+        zvalue : int = 60, 65, 70, 75, 80, 85, 90, 95
 
-            pass an int to select "confidence level" of lower/upper bounds based on table of normal distribtion with:
+            pass an int to select quantile of lower/upper bounds based on table of normal distribtion with examples:
 
-            70 = 70% & 30% confidence
+            70 = 70% & 30% quantile
 
-            75 = 75% & 25% confidence
+            75 = 75% & 25% quantile
 
-            90 = 90% & 10% confidence
+            90 = 90% & 10% quantile
 
-            95 = 95% & 5% confidence
+            95 = 95% & 5% quantile
 
         plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
             """
 
-        if len(param) <= 2:
+        if len(param) <= 4:
             return
 
         param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
         depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
 
+        if zvalue == 60:
+            z_val = 0.26
+            quant_upp = "60%"
+            quant_low = "40%"
+        if zvalue == 65:
+            z_val = 0.39
+            quant_upp = "65%"
+            quant_low = "35%"
         if zvalue == 70:
             z_val = 0.53
+            quant_upp = "70%"
+            quant_low = "30%"
         if zvalue == 75:
             z_val = 0.68
+            quant_upp = "75%"
+            quant_low = "25%"
+        if zvalue == 80:
+            z_val = 0.85
+            quant_upp = "80%"
+            quant_low = "20%"
+        if zvalue == 85:
+            z_val = 1.04
+            quant_upp = "85%"
+            quant_low = "15%"
         if zvalue == 90:
             z_val = 1.29
+            quant_upp = "90%"
+            quant_low = "10%"
         if zvalue == 95:
             z_val = 1.65
+            quant_upp = "95%"
+            quant_low = "5%"
         
         param = np.array(param)
         depth = np.array(depth)
 
-        print(param)
-        print(depth)
+        n = len(param) # number of observations
+
+        # select tvalue for 95% confidence based on the number of observations (sample size)
+            
+        if n <= 5:
+            tvalue = 2.015
+        if n == 6:
+            tvalue = 1.943
+        if n == 7:
+            tvalue = 1.895
+        if n == 8:
+            tvalue = 1.86
+        if n == 9:
+            tvalue = 1.833
+        if n == 10:
+            tvalue = 1.812
+        if n == 11:
+            tvalue = 1.796
+        if n == 12:
+            tvalue = 1.782
+        if n == 13:
+            tvalue = 1.771
+        if n == 14:
+            tvalue = 1.761
+        if n == 15:
+            tvalue = 1.753
+        if n == 16:
+            tvalue = 1.746
+        if n == 17:
+            tvalue = 1.74
+        if n == 18:
+            tvalue = 1.734
+        if n == 19:
+            tvalue = 1.729
+        if n == 20:
+            tvalue = 1.725
+        if n == 21:
+            tvalue = 1.721
+        if n == 22:
+            tvalue = 1.717
+        if n == 23:
+            tvalue = 1.714
+        if n == 24:
+            tvalue = 1.711
+        if n == 25:
+            tvalue = 1.708
+        if n == 26:
+            tvalue = 1.706
+        if n == 27:
+            tvalue = 1.703
+        if n == 28:
+            tvalue = 1.701
+        if n == 29:
+            tvalue = 1.699
+        if n == 30:
+            tvalue = 1.697
+        if n > 30 and n <= 35:
+            tvalue = 1.69
+        if n > 35 and n <= 40:
+            tvalue = 1.684
+        if n > 40 and n <= 45:
+            tvalue = 1.679
+        if n > 45 and n <= 50:
+            tvalue = 1.676
+        if n > 50 and n <= 60:
+            tvalue = 1.671
+        if n > 60 and n <= 70:
+            tvalue = 1.667
+        if n > 70 and n <= 80:
+            tvalue = 1.664
+        if n > 80 and n <= 100:
+            tvalue = 1.66
+        if n > 100:
+            tvalue = 1.645
+
 
         inital_regression = sc.stats.linregress(depth,param)
 
@@ -80,7 +178,6 @@ class DesignProfile():
         print(f'''initial regression:
 {inital_regression}''')
 
-        n = len(param) # number of observations
         r2 = inital_regression[2]**2 # R squared
         r2_cor = (1-(1-r2)*(n-1)/(n-1-1)) # R squared corrected
         std_err_y_est = np.sqrt(1-r2_cor)*std # standard error y estimate from R squared corrected
@@ -115,129 +212,168 @@ class DesignProfile():
         profile_IND = [mean_new_IND, std_new_IND]
 
         if model == "DEP":
-            mode = "DEPENDANT"
-            print(f'''~DEPENDANT~
-new linear regression on new dataset without outliers:
+            mode = "Depth Dependent"
+            print(f'''~DEPENDENT~
+new linear regression on new dataset without outliers
 {profile_DEP}''')
 
-            bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
-            bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
-            bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
+            top_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+            top_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+            top_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-            top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
-            top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
-            top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+            bot_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+            bot_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+            bot_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+
+            low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+            low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+
+            upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+            upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
 
             print('------------------------------------------')
             print(name,mode)
-            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+            print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
+            print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
+            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
+            print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
+            print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
             print('------------------------------------------')
-            lb = [bot_lb, top_lb]
-            ub = [bot_ub, top_ub]
-            be = [bot_be, top_be]
+            lb = [top_lb, bot_lb]
+            ub = [top_ub, bot_ub]
+            be = [top_be, bot_be]
+            upp_mean_95 = [upp_mean_95_top, upp_mean_95_bot]
+            low_mean_95 = [low_mean_95_top, low_mean_95_bot]
 
         if model == "IND":
-            mode = "INDEPENDANT"
-            print(f'''~INDEPENDANT~
-independant mean and standard deviation:
+            mode = "Independent of Depth"
+            print(f'''~INDEPENDENT~
+independent mean and standard deviation:
 {profile_IND}''')
             
-            bot_lb = profile_IND[0] - profile_IND[1] * z_val
-            bot_ub = profile_IND[0] + profile_IND[1] * z_val
-            bot_be = profile_IND[0] 
-
             top_lb = profile_IND[0] - profile_IND[1] * z_val
             top_ub = profile_IND[0] + profile_IND[1] * z_val
             top_be = profile_IND[0] 
 
+            bot_lb = profile_IND[0] - profile_IND[1] * z_val
+            bot_ub = profile_IND[0] + profile_IND[1] * z_val
+            bot_be = profile_IND[0] 
+
+            low_mean_95_top_bot = mean_new_IND - tvalue * (std / np.sqrt(n))
+            upp_mean_95_top_bot = mean_new_IND + tvalue * (std / np.sqrt(n))
+
             print('------------------------------------------')
             print(name,mode)
-            print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-            print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-            print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+            print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
+            print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
+            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
+            print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
+            print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
             print('------------------------------------------')
-            lb = [bot_lb, top_lb]
-            ub = [bot_ub, top_ub]
-            be = [bot_be, top_be]
+            lb = [top_lb, bot_lb]
+            ub = [top_ub, bot_ub]
+            be = [top_be, bot_be]
+            upp_mean_95 = [upp_mean_95_top_bot, upp_mean_95_top_bot]
+            low_mean_95 = [low_mean_95_top_bot, low_mean_95_top_bot]
 
         '''auto model''' # determines best model to use based on lesser value of standard deviation of new dataset of each model 
 
         if model == "AUTO":
             if std_new_IND < std_new_DEP:
-                mode = "INDEPENDANT"
-                print(f'''~INDEPENDANT~
+                mode = "Independent of Depth"
+                print(f'''~INDEPENDENT~
 independant mean and standard deviation:
 {profile_IND}''')
                 
-                bot_lb = profile_IND[0] - profile_IND[1] * z_val
-                bot_ub = profile_IND[0] + profile_IND[1] * z_val
-                bot_be = profile_IND[0] 
-
                 top_lb = profile_IND[0] - profile_IND[1] * z_val
                 top_ub = profile_IND[0] + profile_IND[1] * z_val
                 top_be = profile_IND[0] 
 
+                bot_lb = profile_IND[0] - profile_IND[1] * z_val
+                bot_ub = profile_IND[0] + profile_IND[1] * z_val
+                bot_be = profile_IND[0] 
+
+                low_mean_95_top_bot = mean_new_IND - tvalue * (std / np.sqrt(n))
+                upp_mean_95_top_bot = mean_new_IND + tvalue * (std / np.sqrt(n))
+
                 print('------------------------------------------')
                 print(name,mode)
-                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+                print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
+                print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
+                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
+                print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
+                print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
                 print('------------------------------------------')
-                lb = [bot_lb, top_lb]
-                ub = [bot_ub, top_ub]
-                be = [bot_be, top_be]
+                lb = [top_lb, bot_lb]
+                ub = [top_ub, bot_ub]
+                be = [top_be, bot_be]
+                upp_mean_95 = [upp_mean_95_top_bot, upp_mean_95_top_bot]
+                low_mean_95 = [low_mean_95_top_bot, low_mean_95_top_bot]
+
             else:
-                mode = "DEPENDANT"
-                print(f'''~DEPENDANT~
+                mode = "Depth Dependent"
+                print(f'''~DEPENDENT~
 new linear regression on new dataset without outliers:
 {profile_DEP}''')
 
-                bot_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
-                bot_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
-                bot_be = profile_DEP[0] * depth[0] + profile_DEP[1]
+                top_lb = profile_DEP[0] * depth[0] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+                top_ub = profile_DEP[0] * depth[0] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+                top_be = profile_DEP[0] * depth[0] + profile_DEP[1]
 
-                top_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
-                top_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
-                top_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+                bot_lb = profile_DEP[0] * depth[-1] + profile_DEP[1] - std_err_y_est_new_DEP * z_val
+                bot_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
+                bot_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
+
+                low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+                low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+
+                upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+                upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
 
                 print('------------------------------------------')
                 print(name,mode)
-                print(f'BOT | Lower: {bot_lb}, Upper: {top_lb}')
-                print(f'TOP | Lower: {bot_ub}, Upper: {top_ub}')
-                print(f'BE | Lower: {bot_be}, Upper: {top_be}')
+                print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
+                print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
+                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
+                print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
+                print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
                 print('------------------------------------------')
-                lb = [bot_lb, top_lb]
-                ub = [bot_ub, top_ub]
-                be = [bot_be, top_be]
+                lb = [top_lb, bot_lb]
+                ub = [top_ub, bot_ub]
+                be = [top_be, bot_be]
+                upp_mean_95 = [upp_mean_95_top, upp_mean_95_bot]
+                low_mean_95 = [low_mean_95_top, low_mean_95_bot]
         
         if plot == True:
-            DesignProfile.plotting(depth,param,lb,ub,be,name,mode)
+            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode)
 
-        return [be, lb, ub]
+        return [be, lb, ub, upp_mean_95, low_mean_95]
     
     
-    def plotting(depth, param, lb, ub, be, name, mode):
+    def plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode):
 
         plt.rcParams.update({'font.size': 8})
-        fig, graph = plt.subplots(1, 1, figsize=(5.5,9.5))
+        fig, graph = plt.subplots(1, 1, figsize=(6.5,8.8))
         fig.canvas.manager.set_window_title('Profile Lines')
         fig.tight_layout()
 
-        plt.subplots_adjust(left  = 0.1, right = 0.925, bottom = 0.1, top = 0.9, wspace = 0.2, hspace = 0.2)
+        plt.subplots_adjust(left  = 0.1, right = 0.925, bottom = 0.095, top = 0.89, wspace = 0.2, hspace = 0.2)
 
-        graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = 'lower bounds')
-        graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = 'upper bounds')
+        graph.plot(lb, [depth[0],depth[-1]],color = 'r',alpha = 0.5, label = f'lower bounds {quant_low} quantile')
+        graph.plot(ub, [depth[0],depth[-1]],color = 'g',alpha = 0.5, label = f'upper bounds {quant_upp} quantile')
         graph.plot(be, [depth[0],depth[-1]],color = 'black',alpha = 0.5, label = 'best estimate')
-        graph.title.set_text(f'{name} - {mode}')
-
-        graph.scatter(param, depth, s=12, color = 'b', label = 'V/s')
+        graph.plot(upp_mean_95, [depth[0],depth[-1]],color = 'purple',alpha = 0.5, label = f'mean at 95% confidence', linestyle='dashed')
+        graph.plot(low_mean_95, [depth[0],depth[-1]],color = 'purple',alpha = 0.5, linestyle='dashed')
+        graph.set_title(f'{name} - {mode}', y=1.0, pad=35)
+        unit = str(name).split("-")[0].split("(")[0]
+        graph.scatter(param, depth, s=12, color = 'b', label = f'{unit}')
         graph.invert_yaxis()
-        graph.legend()
+        graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("-")[0]}', loc='center')
-        plt.show()
+        plt.savefig(f'{os.getcwd()}\{name}.pdf', dpi=600.0)
+        plt.close(fig)
+        #plt.show()
 
     #     # def move_line(event):
     #     #     if move_best == True:
@@ -253,8 +389,8 @@ new linear regression on new dataset without outliers:
     #     # fig.canvas.mpl_connect('button_press_event', move_line)
 
 #TESTING
-df = pd.read_excel("50.xlsx", sheet_name="RESV")
-df = df.sort_values(by=['Depth'])
-df.reset_index(inplace=True)
+# df = pd.read_excel("50.xlsx", sheet_name="SU")
+# df = df.sort_values(by=['depth'])
+# df.reset_index(inplace=True)
 
-DesignProfile.profile(param=df['RESV_SWV'], depth=df['Depth'], name="Resonant Column Shear Wave Velocity", model="DEP", zvalue=90, plot=True)
+# DesignProfile.profile(param=df['su'], depth=df['depth'], name="Shear Strength", model="AUTO", zvalue=75, plot=True)

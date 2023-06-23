@@ -16,7 +16,7 @@ import statistics
 import numpy as np
 import configparser
 import openpyxl
-from common.designprofile import DesignProfile
+from common.designprofile_wip import DesignProfile
 from scipy import stats
 from matplotlib import pyplot as plt
 from openpyxl.styles import Font, Alignment, Border, Side
@@ -294,43 +294,68 @@ class MainWindow(QtWidgets.QMainWindow):
                 fr_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), ['true_depth', 'STCN_FCRO']]
                 ic_list = self.cpt_data.loc[(self.cpt_data['true_depth'] >= float(layer[0])) & (self.cpt_data['true_depth'] <= float(layer[1])), ['true_depth', 'STCN_SBTi']]
 
-                self.fs_dict[f'Layers'] = ['fs profile', 'fs mean (MPa)','fs std (MPa)']
-                self.u_dict[f'Layers'] = ['u profile','u mean (kPa)','u std (kPa)']
-                self.qnet_dict[f'Layers'] = ['qnet profile','qnet mean (MPa)','qnet std (MPa)']
-                self.fr_dict[f'Layers'] = ['fr profile','fr mean (-)','fr std (-)']
-                self.ic_dict[f'Layers'] = ['ic profile','ic mean (-)','ic std (-)']
+                self.fs_dict[f'Layers'] = ['fs profile']
+                self.u_dict[f'Layers'] = ['u profile']
+                self.qnet_dict[f'Layers'] = ['qnet profile']
+                self.fr_dict[f'Layers'] = ['fr profile']
+                self.ic_dict[f'Layers'] = ['ic profile']
 
                 qc_profile = DesignProfile.profile(
                     param=qc_list['STCN_QC'], 
                     depth=qc_list['true_depth'], 
-                    name = f'qc (kPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}', 
-                    model="AUTO", 
+                    name = f'qc (kPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}', 
+                    model="DEP", 
                     zvalue=75, 
-                    plot=False)
-                qc_profile = [[None,None],[None,None],[None,None]] if qc_profile == None else qc_profile
-                #print(f'be bot {qc_profile[0][0]} be top {qc_profile[0][1]} lb bot {qc_profile[1][0]} lb top {qc_profile[1][1]} ub bot {qc_profile[2][0]} ub top {qc_profile[2][1]}')
+                    plot=True)
+                #qc_profile = [[None,None],[None,None],[None,None]] if qc_profile == None else qc_profile
 
-                # fs_be = DesignProfile.profile(param=fs_list['STCN_FS'], depth=fs_list['true_depth'], name = f'fs (MPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
-                # fs_be = [[None,None],[None,None],[None,None]] if fs_be == None else fs_be
+                fs_profile = DesignProfile.profile(
+                    param=fs_list['STCN_FS'], 
+                    depth=fs_list['true_depth'], 
+                    name = f'fs (MPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model="DEP", 
+                    zvalue=75, 
+                    plot=True)
+                #fs_be = [[None,None],[None,None],[None,None]] if fs_be == None else fs_be
 
-                # u_be = self.profile(param=u_list['STCN_U'], depth=qc_list['true_depth'], name = f'u (kPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
-                # u_be = [[None,None],[None,None],[None,None]] if u_be == None else u_be
+                u_profile = DesignProfile.profile(param=u_list['STCN_U'], 
+                    depth=qc_list['true_depth'], 
+                    name = f'u (kPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model="DEP", 
+                    zvalue=75, 
+                    plot=True)
+                #u_be = [[None,None],[None,None],[None,None]] if u_be == None else u_be
 
-                # qnet_be = self.profile(param=qnet_list['STCN_Qnet'], depth=qnet_list['true_depth'], name = f'qnet (MPa) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
-                # qnet_be = [[None,None],[None,None],[None,None]] if qnet_be == None else qnet_be
+                qnet_profile = DesignProfile.profile(param=qnet_list['STCN_Qnet'], 
+                    depth=qnet_list['true_depth'], 
+                    name = f'qnet (MPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model="DEP", 
+                    zvalue=75, 
+                    plot=True)
+                #qnet_be = [[None,None],[None,None],[None,None]] if qnet_be == None else qnet_be
 
-                # fr_be = self.profile(param=fr_list['STCN_FCRO'], depth=fr_list['true_depth'], name = f'fr (-) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
-                # fr_be = [[None,None],[None,None],[None,None]] if fr_be == None else fr_be
+                fr_profile = DesignProfile.profile(param=fr_list['STCN_FCRO'], 
+                    depth=fr_list['true_depth'], 
+                    name = f'fr (—) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model="DEP", 
+                    zvalue=75, 
+                    plot=True)
+                #fr_be = [[None,None],[None,None],[None,None]] if fr_be == None else fr_be
 
-                # ic_be = self.profile(param=ic_list['STCN_SBTi'], depth=ic_list['true_depth'], name = f'ic (-) - {bh} | {layer[0]}m to {layer[1]}m - {unit[1]}')
-                # ic_be = [[None,None],[None,None],[None,None]] if ic_be == None else ic_be
+                ic_profile = DesignProfile.profile(param=ic_list['STCN_SBTi'], 
+                    depth=ic_list['true_depth'], 
+                    name = f'ic (—) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model="DEP", 
+                    zvalue=75, 
+                    plot=True)
+                #ic_be = [[None,None],[None,None],[None,None]] if ic_be == None else ic_be
 
-                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_profile}", qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
-                # self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_be}", fs_list['STCN_FS'].mean(),fs_list['STCN_FS'].std()]
-                # self.u_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{u_be}",u_list['STCN_U'].mean(),u_list['STCN_U'].std()]
-                # self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [qnet_list['STCN_Qnet'].mean(),qnet_list['STCN_Qnet'].std()]
-                # self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [fr_list['STCN_FCRO'].mean(),fr_list['STCN_FCRO'].std()]
-                # self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [ic_list['STCN_SBTi'].mean(),ic_list['STCN_SBTi'].std()]
+                self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_profile}"]#, qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
+                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_profile}"]#, fs_list['STCN_FS'].mean(),fs_list['STCN_FS'].std()]
+                self.u_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{u_profile}"]#,u_list['STCN_U'].mean(),u_list['STCN_U'].std()]
+                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{qnet_profile}']#qnet_list['STCN_Qnet'].mean(),qnet_list['STCN_Qnet'].std()]
+                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{fr_profile}']#fr_list['STCN_FCRO'].mean(),fr_list['STCN_FCRO'].std()]
+                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{ic_profile}']#ic_list['STCN_SBTi'].mean(),ic_list['STCN_SBTi'].std()]
 
                 if float(depth) >= float(layer[0]) and float(depth) <= float(layer[1]):
                     if unit[0] == "":
@@ -415,7 +440,7 @@ LAYERS: {self.geol_layers_list}
             QApplication.processEvents()
 
         #build dict with keys as index - needs to use these as index for 'scalar array' error
-        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc Profile (Bot, Top)', 'qc mean (MPa)', 'qc std (MPa)'])
+        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc Profile'])
         self.full_df['Borehole'] = self.full_df.index
         self.full_df[['Borehole','Geology Layers']] = self.full_df['Borehole'].str.split('|', expand=True)
         move_cols = ['Borehole','Geology Layers']
@@ -429,7 +454,7 @@ LAYERS: {self.geol_layers_list}
             df = df.iloc[1:]         
             col_list = [x for x in df.columns]
             self.full_df[col_list[0]] = df[col_list[0]]
-            self.full_df[col_list[1]] = df[col_list[1]]
+            #self.full_df[col_list[1]] = df[col_list[1]]
 
         build_df_from_dict(self.fs_dict)
         build_df_from_dict(self.u_dict)
@@ -441,7 +466,7 @@ LAYERS: {self.geol_layers_list}
         self.full_df = self.full_df[keep_cols + [col for col in self.full_df.columns if 'std' in col]]
 
         self.full_df.replace(to_replace=0, value=np.nan, inplace=True)
-        self.full_df.replace(to_replace="[[None, None], [None, None], [None, None]]", value=np.nan, inplace=True) 
+        self.full_df.replace(to_replace="None", value=np.nan, inplace=True) 
         self.full_df.dropna(axis = 1, how="all", inplace= True)
 
         fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
