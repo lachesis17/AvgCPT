@@ -30,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        uic.loadUi("assets/ui/mainwindow - copy.ui", self)
+        uic.loadUi("assets/ui/mainwindow.ui", self)
         self.setWindowIcon(QtGui.QIcon('assets/images/icon.ico'))
     
         self.player = QMediaPlayer()
@@ -39,6 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dark_mode_button.setChecked(bool(self.config.get('Theme','dark')))
 
         self.cpt_value = ""
+        self.pdf_location = ""
 
         self.button_copy_actual.setIcon(QtGui.QIcon('assets/images/copy.png'))
         self.button_copy_avg.setIcon(QtGui.QIcon('assets/images/copy.png'))
@@ -47,9 +48,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actual_val.setReadOnly(True)
         self.average_val.setReadOnly(True)
         self.unit_textbox.setReadOnly(True)
+        self.quant_desc.setReadOnly(True)
+        self.dir_box.setReadOnly(True)
 
         self.dark_mode_button.clicked.connect(self.dark_toggle)
         self.full_bh.clicked.connect(self.plot_full_bh)
+        self.pdf_box.clicked.connect(self.pdf_dir)
+        self.dir_box.mousePressEvent = self.pdf_dir
         self.file_open.triggered.connect(self.get_file_location)
         self.unit_selector.valueChanged.connect(self.change_unit)
         self.button_gint.clicked.connect(self.get_file_location)
@@ -303,52 +308,52 @@ class MainWindow(QtWidgets.QMainWindow):
                 qc_profile = DesignProfile.profile(
                     param=qc_list['STCN_QC'], 
                     depth=qc_list['true_depth'], 
-                    name = f'qc (kPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}', 
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #qc_profile = [[None,None],[None,None],[None,None]] if qc_profile == None else qc_profile
+                    name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}', 
+                    model=self.get_model(), 
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 fs_profile = DesignProfile.profile(
                     param=fs_list['STCN_FS'], 
                     depth=fs_list['true_depth'], 
-                    name = f'fs (MPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #fs_be = [[None,None],[None,None],[None,None]] if fs_be == None else fs_be
+                    name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model=self.get_model(), 
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 u_profile = DesignProfile.profile(param=u_list['STCN_U'], 
                     depth=qc_list['true_depth'], 
-                    name = f'u (kPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #u_be = [[None,None],[None,None],[None,None]] if u_be == None else u_be
+                    name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model=self.get_model(), 
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 qnet_profile = DesignProfile.profile(param=qnet_list['STCN_Qnet'], 
                     depth=qnet_list['true_depth'], 
-                    name = f'qnet (MPa) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #qnet_be = [[None,None],[None,None],[None,None]] if qnet_be == None else qnet_be
+                    name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model=self.get_model(),
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 fr_profile = DesignProfile.profile(param=fr_list['STCN_FCRO'], 
                     depth=fr_list['true_depth'], 
-                    name = f'fr (—) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #fr_be = [[None,None],[None,None],[None,None]] if fr_be == None else fr_be
+                    name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model=self.get_model(), 
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 ic_profile = DesignProfile.profile(param=ic_list['STCN_SBTi'], 
                     depth=ic_list['true_depth'], 
-                    name = f'ic (—) - {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
-                    model="DEP", 
-                    zvalue=75, 
-                    plot=True)
-                #ic_be = [[None,None],[None,None],[None,None]] if ic_be == None else ic_be
+                    name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    model=self.get_model(), 
+                    zvalue=self.quant_box.value(), 
+                    plot=self.pdf_box.isChecked(),
+                    save=self.pdf_location)
 
                 self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_profile}"]#, qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
                 self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_profile}"]#, fs_list['STCN_FS'].mean(),fs_list['STCN_FS'].std()]
@@ -414,6 +419,11 @@ LAYERS: {self.geol_layers_list}
     
         bhs_in_gint = [self.point_table.item(x).text() for x in range(self.point_table.count())]
 
+        if (self.pdf_box.isChecked() == True and self.pdf_location == "") or (self.pdf_box.isChecked() == True and self.dir_box.text() == "Please select a PDF save directory!"):
+            self.dir_box.setText(f'Please select a PDF save directory!')
+            print("Please select a directory for PDF export.")
+            return
+
         for x in range(0,len(bhs_in_gint)):
 
             query = f"SELECT * FROM STCN_DATA WHERE PointID ='{str(bhs_in_gint[x])}'"
@@ -440,12 +450,11 @@ LAYERS: {self.geol_layers_list}
             QApplication.processEvents()
 
         #build dict with keys as index - needs to use these as index for 'scalar array' error
-        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc Profile'])
+        self.full_df = pd.DataFrame.from_dict(self.qc_dict, orient='index', columns=['qc profile'])
         self.full_df['Borehole'] = self.full_df.index
         self.full_df[['Borehole','Geology Layers']] = self.full_df['Borehole'].str.split('|', expand=True)
         move_cols = ['Borehole','Geology Layers']
         self.full_df = self.full_df[move_cols + [col for col in self.full_df.columns if col not in move_cols]]
-        print(self.full_df)
 
         #add in the rest of the value dictionaries into full df
         def build_df_from_dict(y):
@@ -467,7 +476,85 @@ LAYERS: {self.geol_layers_list}
 
         self.full_df.replace(to_replace=0, value=np.nan, inplace=True)
         self.full_df.replace(to_replace="None", value=np.nan, inplace=True) 
+        self.full_df.replace({'\\[': ''}, regex=True, inplace=True)
+        self.full_df.replace({'\\]': ''}, regex=True, inplace=True)
         self.full_df.dropna(axis = 1, how="all", inplace= True)
+
+        self.full_df[["Qc Best Estimate TOP",
+                      "Qc Best Estimate BOT",
+                      "Qc Lower Bounds TOP",
+                      "Qc Lower Bounds BOT",
+                      "Qc Upper Bounds TOP",
+                      "Qc Upper Bounds BOT",
+                      "Qc Mean at 95% Confidence (Upper) - TOP",
+                      "Qc Mean at 95% Confidence (Upper) - BOT",
+                      "Qc Mean at 95% Confidence (Lower) - TOP",
+                      "Qc Mean at 95% Confidence (Lower) - BOT",
+                      "Qc Standard Deviation - All Data",
+                      "Qc Standard Deviation - Outliers Removed"]] = self.full_df['qc profile'].str.split(',', expand=True)
+        self.full_df[["Fs Best Estimate TOP",
+                      "Fs Best Estimate BOT",
+                      "Fs Lower Bounds TOP",
+                      "Fs Lower Bounds BOT",
+                      "Fs Upper Bounds TOP",
+                      "Fs Upper Bounds BOT",
+                      "Fs Mean at 95% Confidence (Upper) - TOP",
+                      "Fs Mean at 95% Confidence (Upper) - BOT",
+                      "Fs Mean at 95% Confidence (Lower) - TOP",
+                      "Fs Mean at 95% Confidence (Lower) - BOT",
+                      "Fs Standard Deviation - All Data",
+                      "Fs Standard Deviation - Outliers Removed"]] = self.full_df['fs profile'].str.split(',', expand=True)
+        self.full_df[["U Best Estimate TOP",
+                      "U Best Estimate BOT",
+                      "U Lower Bounds TOP",
+                      "U Lower Bounds BOT",
+                      "U Upper Bounds TOP",
+                      "U Upper Bounds BOT",
+                      "U Mean at 95% Confidence (Upper) - TOP",
+                      "U Mean at 95% Confidence (Upper) - BOT",
+                      "U Mean at 95% Confidence (Lower) - TOP",
+                      "U Mean at 95% Confidence (Lower) - BOT",
+                      "U Standard Deviation - All Data",
+                      "U Standard Deviation - Outliers Removed"]] = self.full_df['u profile'].str.split(',', expand=True)  
+        self.full_df[["Qnet Best Estimate TOP",
+                      "Qnet Best Estimate BOT",
+                      "Qnet Lower Bounds TOP",
+                      "Qnet Lower Bounds BOT",
+                      "Qnet Upper Bounds TOP",
+                      "Qnet Upper Bounds BOT",
+                      "Qnet Mean at 95% Confidence (Upper) - TOP",
+                      "Qnet Mean at 95% Confidence (Upper) - BOT",
+                      "Qnet Mean at 95% Confidence (Lower) - TOP",
+                      "Qnet Mean at 95% Confidence (Lower) - BOT",
+                      "Qnet Standard Deviation - All Data",
+                      "Qnet Standard Deviation - Outliers Removed"]] = self.full_df['qnet profile'].str.split(',', expand=True)
+        self.full_df[["Fr Best Estimate TOP",
+                      "Fr Best Estimate BOT",
+                      "Fr Lower Bounds TOP",
+                      "Fr Lower Bounds BOT",
+                      "Fr Upper Bounds TOP",
+                      "Fr Upper Bounds BOT",
+                      "Fr Mean at 95% Confidence (Upper) - TOP",
+                      "Fr Mean at 95% Confidence (Upper) - BOT",
+                      "Fr Mean at 95% Confidence (Lower) - TOP",
+                      "Fr Mean at 95% Confidence (Lower) - BOT",
+                      "Fr Standard Deviation - All Data",
+                      "Fr Standard Deviation - Outliers Removed"]] = self.full_df['fr profile'].str.split(',', expand=True)  
+        self.full_df[["Ic Best Estimate TOP",
+                      "Ic Best Estimate BOT",
+                      "Ic Lower Bounds TOP",
+                      "Ic Lower Bounds BOT",
+                      "Ic Upper Bounds TOP",
+                      "Ic Upper Bounds BOT",
+                      "Ic Mean at 95% Confidence (Upper) - TOP",
+                      "Ic Mean at 95% Confidence (Upper) - BOT",
+                      "Ic Mean at 95% Confidence (Lower) - TOP",
+                      "Ic Mean at 95% Confidence (Lower) - BOT",
+                      "Ic Standard Deviation - All Data",
+                      "Ic Standard Deviation - Outliers Removed"]] = self.full_df['ic profile'].str.split(',', expand=True)  
+        
+        
+        self.full_df.drop(columns=['qc profile', 'fs profile', 'u profile', 'qnet profile', 'fr profile', 'ic profile'], inplace=True)
 
         fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
         
@@ -486,7 +573,7 @@ LAYERS: {self.geol_layers_list}
                 column_letter = (get_column_letter(column_cells[0].column))
                 last_col = column_letter
                 ws.column_dimensions[column_letter].width = column_length * 1.15
-            ws.column_dimensions['A'].width = column_length * 1.25
+            #ws.column_dimensions['A'].width = column_length * 1.25
             
             ws.merge_cells('A1:A2')
             ws['A1'] = 'Borehole'
@@ -496,14 +583,24 @@ LAYERS: {self.geol_layers_list}
             ws['B1'] = 'Geology Layers'
             ws['B1'].font = Font(bold=True)
             ws['B1'].alignment = Alignment(horizontal='center')
-            ws.merge_cells('C1:H1')
-            ws['C1'] = 'Mean Values'
+            ws.merge_cells('C1:N1')
+            ws['C1'] = 'Qc CPT Profile'
             ws['C1'].font = Font(bold=True) 
-            ws['C1'].alignment = Alignment(horizontal='center')
-            ws.merge_cells('I1:N1')
-            ws['I1'] = 'Standard Deviation'
-            ws['I1'].font = Font(bold=True) 
-            ws['I1'].alignment = Alignment(horizontal='center')
+            ws.merge_cells('O1:Z1')
+            ws['O1'] = 'Fs CPT Profile'
+            ws['O1'].font = Font(bold=True) 
+            ws.merge_cells('AA1:AL1')
+            ws['AA1'] = 'U CPT Profile'
+            ws['AA1'].font = Font(bold=True) 
+            ws.merge_cells('AM1:AX1')
+            ws['AM1'] = 'Qnet CPT Profile'
+            ws['AM1'].font = Font(bold=True) 
+            ws.merge_cells('AY1:BJ1')
+            ws['AY1'] = 'Fr CPT Profile'
+            ws['AY1'].font = Font(bold=True) 
+            ws.merge_cells('BK1:BV1')
+            ws['BK1'] = 'Ic CPT Profile'
+            ws['BK1'].font = Font(bold=True) 
 
             def set_border(ws, cell_range):
                 thin = Side(border_style="thin", color="000000")
@@ -517,11 +614,22 @@ LAYERS: {self.geol_layers_list}
                         cell.border = Border(top=None, left=thin, right=None, bottom=None)
 
             end_row = str(len(ws['A']))
-            border_range = 'I1:I' + end_row
-            set_single_border(ws, border_range) 
             border_range = 'C1:C' + end_row
             set_single_border(ws, border_range) 
-            set_border(ws, 'A1:N2')
+            border_range = 'O1:O' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'AA1:AA' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'AM1:AM' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'AY1:AY' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'BK1:BK' + end_row
+            set_single_border(ws, border_range) 
+            border_range = 'BW1:BW' + end_row
+            set_single_border(ws, border_range) 
+
+            set_border(ws, 'A1:BV2')
             head_row = ws['C3']
             ws.freeze_panes = head_row
 
@@ -890,6 +998,31 @@ Are you sure you want to delete this much data?''')
         self.average_val.setText(f'''<p align="center">{self.bh_select} (recalculated) average value for {self.cpt_value} at {self.cpt_depth}m is: {round(avg_val, 4)}</p>''')
         print(f"""Recalculated average value for {self.cpt_value} at {self.cpt_depth}m is: {avg_val}
 ****************************************""")
+        
+
+    def get_model(self):
+        model_selection = self.model_box.currentText()
+
+        if model_selection == "Dependent":
+            return "DEP"
+        if model_selection == "Independent":
+            return "IND"
+        if model_selection == "Automatic":
+            return "AUTO"
+
+        
+    def pdf_dir(self,event):
+        if self.pdf_box.isChecked() == True:
+            self.pdf_location = QtWidgets.QFileDialog.getExistingDirectory(self, "Save PDF of CPT Profiles...", os.getcwd()) 
+            if self.pdf_location == "":
+                self.dir_box.setText(f'Please select a PDF save directory!')
+                return
+        self.dir_box.clear()
+        self.dir_box.setText(f'{self.pdf_location}')
+        if self.pdf_box.isChecked() == False and self.pdf_location == "":
+            self.dir_box.setText(f'Please select a PDF save directory!')
+            return
+        
 
     def dark_toggle(self):
         self.play_nice()

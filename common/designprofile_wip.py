@@ -8,7 +8,7 @@ import os
 sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():    
-    def profile(param:list, depth:list, name:str, model:str, zvalue:int, plot:bool) -> list:
+    def profile(param:list, depth:list, name:str, model:str, zvalue:int, plot:bool, save: str) -> list:
         """
         Perform statistical analysis on two lists (x,y) for linear regression (scipy) to determine best estimate, lower and upper bounds of (x) data.
         Removes outliers with independant or dependant models and returns list of lists with top/bot bot values of best estimate, lower bounds, upper bounds as: [[be_top,be_bot][lb_top,lb_bot][ub_top,ub_bot]]
@@ -168,7 +168,7 @@ class DesignProfile():
 
         inital_regression = sc.stats.linregress(depth,param)
 
-        if math.isnan(inital_regression[0]):
+        if math.isnan(inital_regression[0]) or inital_regression[2] == 0.0:
             print('help')
             return
 
@@ -231,11 +231,13 @@ new linear regression on new dataset without outliers
             upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
             upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
 
+            std2 = std_new_DEP
+
             print('------------------------------------------')
             print(name,mode)
+            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
             print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
             print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
             print('------------------------------------------')
@@ -244,6 +246,7 @@ new linear regression on new dataset without outliers
             be = [top_be, bot_be]
             upp_mean_95 = [upp_mean_95_top, upp_mean_95_bot]
             low_mean_95 = [low_mean_95_top, low_mean_95_bot]
+            std_arr = [std, std2]
 
         if model == "IND":
             mode = "Independent of Depth"
@@ -262,19 +265,22 @@ independent mean and standard deviation:
             low_mean_95_top_bot = mean_new_IND - tvalue * (std / np.sqrt(n))
             upp_mean_95_top_bot = mean_new_IND + tvalue * (std / np.sqrt(n))
 
+            std2 = std_new_IND
+
             print('------------------------------------------')
             print(name,mode)
+            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
             print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-            print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
-            print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
-            print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
+            print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
+            print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
             print('------------------------------------------')
             lb = [top_lb, bot_lb]
             ub = [top_ub, bot_ub]
             be = [top_be, bot_be]
             upp_mean_95 = [upp_mean_95_top_bot, upp_mean_95_top_bot]
             low_mean_95 = [low_mean_95_top_bot, low_mean_95_top_bot]
+            std_arr = [std, std2]
 
         '''auto model''' # determines best model to use based on lesser value of standard deviation of new dataset of each model 
 
@@ -296,19 +302,22 @@ independant mean and standard deviation:
                 low_mean_95_top_bot = mean_new_IND - tvalue * (std / np.sqrt(n))
                 upp_mean_95_top_bot = mean_new_IND + tvalue * (std / np.sqrt(n))
 
+                std2 = std_new_IND
+
                 print('------------------------------------------')
                 print(name,mode)
+                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
                 print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
-                print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
-                print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
+                print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
+                print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
                 print('------------------------------------------')
                 lb = [top_lb, bot_lb]
                 ub = [top_ub, bot_ub]
                 be = [top_be, bot_be]
                 upp_mean_95 = [upp_mean_95_top_bot, upp_mean_95_top_bot]
                 low_mean_95 = [low_mean_95_top_bot, low_mean_95_top_bot]
+                std_arr = [std, std2]
 
             else:
                 mode = "Depth Dependent"
@@ -330,11 +339,13 @@ new linear regression on new dataset without outliers:
                 upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
                 upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
 
+                std2 = std_new_DEP
+
                 print('------------------------------------------')
                 print(name,mode)
+                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
                 print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-                print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
                 print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
                 print('------------------------------------------')
@@ -343,14 +354,15 @@ new linear regression on new dataset without outliers:
                 be = [top_be, bot_be]
                 upp_mean_95 = [upp_mean_95_top, upp_mean_95_bot]
                 low_mean_95 = [low_mean_95_top, low_mean_95_bot]
+                std_arr = [std, std2]
         
         if plot == True:
-            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode)
+            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save)
 
-        return [be, lb, ub, upp_mean_95, low_mean_95]
+        return [be, lb, ub, upp_mean_95, low_mean_95, std_arr]
     
     
-    def plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode):
+    def plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save):
 
         plt.rcParams.update({'font.size': 8})
         fig, graph = plt.subplots(1, 1, figsize=(6.5,8.8))
@@ -370,8 +382,8 @@ new linear regression on new dataset without outliers:
         graph.invert_yaxis()
         graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
-        graph.set_xlabel(f'{str(name).split("-")[0]}', loc='center')
-        plt.savefig(f'{os.getcwd()}\{name}.pdf', dpi=600.0)
+        graph.set_xlabel(f'{str(name).split("—")[0]}', loc='center')
+        plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
         plt.close(fig)
         #plt.show()
 
