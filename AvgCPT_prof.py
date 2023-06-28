@@ -308,7 +308,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 qc_profile = DesignProfile.profile(
                     param=qc_list['STCN_QC'], 
                     depth=qc_list['true_depth'], 
-                    name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}', 
+                    name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}', 
                     model=self.get_model(), 
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -317,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 fs_profile = DesignProfile.profile(
                     param=fs_list['STCN_FS'], 
                     depth=fs_list['true_depth'], 
-                    name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -325,7 +325,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 u_profile = DesignProfile.profile(param=u_list['STCN_U'], 
                     depth=qc_list['true_depth'], 
-                    name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -333,7 +333,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 qnet_profile = DesignProfile.profile(param=qnet_list['STCN_Qnet'], 
                     depth=qnet_list['true_depth'], 
-                    name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(),
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -341,7 +341,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 fr_profile = DesignProfile.profile(param=fr_list['STCN_FCRO'], 
                     depth=fr_list['true_depth'], 
-                    name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -349,7 +349,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 ic_profile = DesignProfile.profile(param=ic_list['STCN_SBTi'], 
                     depth=ic_list['true_depth'], 
-                    name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]}',
+                    name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
                     zvalue=self.quant_box.value(), 
                     plot=self.pdf_box.isChecked(),
@@ -539,22 +539,23 @@ LAYERS: {self.geol_layers_list}
                       "Fr Mean at 95% Confidence (Lower) - TOP",
                       "Fr Mean at 95% Confidence (Lower) - BOT",
                       "Fr Standard Deviation - All Data",
-                      "Fr Standard Deviation - Outliers Removed"]] = self.full_df['fr profile'].str.split(',', expand=True)  
-        self.full_df[["Ic Best Estimate TOP",
-                      "Ic Best Estimate BOT",
-                      "Ic Lower Bounds TOP",
-                      "Ic Lower Bounds BOT",
-                      "Ic Upper Bounds TOP",
-                      "Ic Upper Bounds BOT",
-                      "Ic Mean at 95% Confidence (Upper) - TOP",
-                      "Ic Mean at 95% Confidence (Upper) - BOT",
-                      "Ic Mean at 95% Confidence (Lower) - TOP",
-                      "Ic Mean at 95% Confidence (Lower) - BOT",
-                      "Ic Standard Deviation - All Data",
-                      "Ic Standard Deviation - Outliers Removed"]] = self.full_df['ic profile'].str.split(',', expand=True)  
-        
-        
-        self.full_df.drop(columns=['qc profile', 'fs profile', 'u profile', 'qnet profile', 'fr profile', 'ic profile'], inplace=True)
+                      "Fr Standard Deviation - Outliers Removed"]] = self.full_df['fr profile'].str.split(',', expand=True) 
+        if 'ic profile' in self.full_df.columns:
+            self.full_df[["Ic Best Estimate TOP",
+                        "Ic Best Estimate BOT",
+                        "Ic Lower Bounds TOP",
+                        "Ic Lower Bounds BOT",
+                        "Ic Upper Bounds TOP",
+                        "Ic Upper Bounds BOT",
+                        "Ic Mean at 95% Confidence (Upper) - TOP",
+                        "Ic Mean at 95% Confidence (Upper) - BOT",
+                        "Ic Mean at 95% Confidence (Lower) - TOP",
+                        "Ic Mean at 95% Confidence (Lower) - BOT",
+                        "Ic Standard Deviation - All Data",
+                        "Ic Standard Deviation - Outliers Removed"]] = self.full_df['ic profile'].str.split(',', expand=True)  
+            self.full_df.drop(columns=['qc profile', 'fs profile', 'u profile', 'qnet profile', 'fr profile', 'ic profile'], inplace=True)
+        else:
+            self.full_df.drop(columns=['qc profile', 'fs profile', 'u profile', 'qnet profile', 'fr profile'], inplace=True)
 
         fname = QtWidgets.QFileDialog.getSaveFileName(self, "Save export of CPT averages...", os.getcwd(), "Excel file *.xlsx;; CSV *.csv")
         

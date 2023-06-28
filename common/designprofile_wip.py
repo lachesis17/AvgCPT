@@ -5,6 +5,7 @@ import scipy as sc
 import sys
 import pandas as pd
 import os
+from types import NoneType
 sys.stdout.reconfigure(encoding='utf-8')
 
 class DesignProfile():    
@@ -48,11 +49,17 @@ class DesignProfile():
         plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
             """
 
-        if len(param) <= 4:
+        if len(param) <= 4 or all(isinstance(x, NoneType) for x in param):
             return
 
-        param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
-        depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+        if any(isinstance(x, str) for x in param):
+            param = [float(param) for iter,(param,depth) in enumerate(zip(param,depth)) if not param == ""]
+            depth = [float(depth) for iter,(param,depth) in enumerate(zip(param,depth)) if not param == ""]
+            param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+            depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+        else: 
+            param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+            depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
 
         if zvalue == 60:
             z_val = 0.26
@@ -89,6 +96,9 @@ class DesignProfile():
         
         param = np.array(param)
         depth = np.array(depth)
+    
+        if len(param) <= 4:
+            return
 
         n = len(param) # number of observations
 
@@ -164,7 +174,6 @@ class DesignProfile():
             tvalue = 1.66
         if n > 100:
             tvalue = 1.645
-
 
         inital_regression = sc.stats.linregress(depth,param)
 
@@ -365,7 +374,7 @@ new linear regression on new dataset without outliers:
     def plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save):
 
         plt.rcParams.update({'font.size': 8})
-        fig, graph = plt.subplots(1, 1, figsize=(6.5,8.8))
+        fig, graph = plt.subplots(1, 1, figsize=(7.0,12.5))
         fig.canvas.manager.set_window_title('Profile Lines')
         fig.tight_layout()
 
