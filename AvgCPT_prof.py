@@ -16,7 +16,7 @@ import statistics
 import numpy as np
 import configparser
 import openpyxl
-from common.designprofile_wip import DesignProfile
+from common.designprofile import DesignProfile
 from scipy import stats
 from matplotlib import pyplot as plt
 from openpyxl.styles import Font, Alignment, Border, Side
@@ -310,7 +310,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=qc_list['true_depth'], 
                     name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}', 
                     model=self.get_model(), 
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
@@ -319,7 +319,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=fs_list['true_depth'], 
                     name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
@@ -327,7 +327,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=qc_list['true_depth'], 
                     name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
@@ -335,7 +335,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=qnet_list['true_depth'], 
                     name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(),
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
@@ -343,7 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=fr_list['true_depth'], 
                     name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
@@ -351,16 +351,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     depth=ic_list['true_depth'], 
                     name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
                     model=self.get_model(), 
-                    zvalue=self.quant_box.value(), 
+                    zvalue=int(self.quant_box.currentText()), 
                     plot=self.pdf_box.isChecked(),
                     save=self.pdf_location)
 
                 self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_profile}"]#, qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
-                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_profile}"]#, fs_list['STCN_FS'].mean(),fs_list['STCN_FS'].std()]
-                self.u_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{u_profile}"]#,u_list['STCN_U'].mean(),u_list['STCN_U'].std()]
-                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{qnet_profile}']#qnet_list['STCN_Qnet'].mean(),qnet_list['STCN_Qnet'].std()]
-                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{fr_profile}']#fr_list['STCN_FCRO'].mean(),fr_list['STCN_FCRO'].std()]
-                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{ic_profile}']#ic_list['STCN_SBTi'].mean(),ic_list['STCN_SBTi'].std()]
+                self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_profile}"]
+                self.u_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{u_profile}"]
+                self.qnet_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{qnet_profile}']
+                self.fr_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{fr_profile}']
+                self.ic_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [f'{ic_profile}']
 
                 if float(depth) >= float(layer[0]) and float(depth) <= float(layer[1]):
                     if unit[0] == "":
@@ -419,7 +419,7 @@ LAYERS: {self.geol_layers_list}
     
         bhs_in_gint = [self.point_table.item(x).text() for x in range(self.point_table.count())]
 
-        if (self.pdf_box.isChecked() == True and self.pdf_location == "") or (self.pdf_box.isChecked() == True and self.dir_box.text() == "Please select a PDF save directory!"):
+        if (self.pdf_box.isChecked() == True and self.pdf_location == "") or (self.pdf_box.isChecked() == True and self.dir_box.toPlainText() == "Please select a PDF save directory!"):
             self.dir_box.setText(f'Please select a PDF save directory!')
             print("Please select a directory for PDF export.")
             return
@@ -1089,6 +1089,11 @@ Are you sure you want to delete this much data?''')
             self.menubar.setStyleSheet(f"font: 10pt 'Roboto'; background: #f0f0f0; color: black;")
             self.point_table.setStyleSheet(f"{self.config.get('Theme','table_css_light')}")
             self.depth_table.setStyleSheet(f"{self.config.get('Theme','table_css_light')}")
+            self.dir_box.setStyleSheet(f"{self.config.get('Theme','textbox_dark_css_light2')}")
+            self.pdf_box.setStyleSheet(f"{self.config.get('Theme','checkbox_css_light')}")
+            self.model_box.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
+            self.quant_box.setStyleSheet(f"{self.config.get('Theme','combo_css_light')}")
+            self.quant_desc.setStyleSheet(f"{self.config.get('Theme','textbox_css_light')}")
 
             self.reset_graph()   
             if not self.cpt_value == "":
@@ -1156,6 +1161,11 @@ Are you sure you want to delete this much data?''')
             self.menubar.setStyleSheet(f"font: 10pt 'Roboto'; background: #353535; color: white;")
             self.point_table.setStyleSheet(f"{self.config.get('Theme','table_css')}")
             self.depth_table.setStyleSheet(f"{self.config.get('Theme','table_css')}")
+            self.dir_box.setStyleSheet(f"{self.config.get('Theme','textbox_dark_css2')}")
+            self.pdf_box.setStyleSheet(f"{self.config.get('Theme','checkbox_css')}")
+            self.model_box.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
+            self.quant_box.setStyleSheet(f"{self.config.get('Theme','combo_css')}")
+            self.quant_desc.setStyleSheet(f"{self.config.get('Theme','textbox_css')}")
 
             self.reset_graph()
             if not self.cpt_value == "":
