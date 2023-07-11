@@ -282,8 +282,8 @@ independent mean and standard deviation:
             print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
             print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-            print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
-            print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
+            print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
+            print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
             print('------------------------------------------')
             lb = [top_lb, bot_lb]
             ub = [top_ub, bot_ub]
@@ -319,8 +319,8 @@ independant mean and standard deviation:
                 print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
                 print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
-                print(f'Upper Mean 95% | TOP: {upp_mean_95_top}, BOT: {upp_mean_95_bot}')
-                print(f'Lower Mean 95% | TOP: {low_mean_95_top}, BOT: {low_mean_95_bot}')
+                print(f'Upper Mean 95% | TOP: {upp_mean_95_top_bot}, BOT: {upp_mean_95_top_bot}')
+                print(f'Lower Mean 95% | TOP: {low_mean_95_top_bot}, BOT: {low_mean_95_top_bot}')
                 print('------------------------------------------')
                 lb = [top_lb, bot_lb]
                 ub = [top_ub, bot_ub]
@@ -393,9 +393,8 @@ new linear regression on new dataset without outliers:
         graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("—")[0]}', loc='center')
-        plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
-        plt.close(fig)
-        #plt.show()
+        #plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
+        plt.show()
 
     #     # def move_line(event):
     #     #     if move_best == True:
@@ -411,8 +410,8 @@ new linear regression on new dataset without outliers:
     #     # fig.canvas.mpl_connect('button_press_event', move_line)
 
 #TESTING
-# df = pd.read_excel("50.xlsx", sheet_name="SU")
+# df = pd.read_excel("50.xlsx", sheet_name="UCS")
 # df = df.sort_values(by=['depth'])
 # df.reset_index(inplace=True)
 
-# DesignProfile.profile(param=df['su'], depth=df['depth'], name="Shear Strength", model="AUTO", zvalue=75, plot=True)
+# DesignProfile.profile(param=df['ucs'], depth=df['depth'], name="UCS", model="DEP", zvalue=90, plot=True, save="")
