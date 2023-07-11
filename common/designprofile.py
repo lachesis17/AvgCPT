@@ -393,8 +393,8 @@ new linear regression on new dataset without outliers:
         graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("—")[0]}', loc='center')
-        #plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
-        plt.show()
+        plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
+        #plt.show()
 
     #     # def move_line(event):
     #     #     if move_best == True:
