@@ -47,7 +47,7 @@ class DesignProfile(object):
     plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
 
     save : str = directory to save export of plots
-        """
+    """
     
     def __init__(self, *args):
         super(DesignProfile, self).__init__()
@@ -67,11 +67,8 @@ class DesignProfile(object):
         if any(isinstance(x, str) for x in self.param):
             param = [float(param) for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not param == ""]
             depth = [float(depth) for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not param == ""]
-            param = [param for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
-            depth = [depth for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
-        else: 
-            param = [param for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
-            depth = [depth for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
+        param = [param for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
+        depth = [depth for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
 
         if self.zvalue == 60:
             z_val = 0.26
@@ -106,8 +103,8 @@ class DesignProfile(object):
             quant_upp = "95%"
             quant_low = "5%"
         
-        param = np.array(self.param)
-        depth = np.array(self.depth)
+        param = np.array(param)
+        depth = np.array(depth)
     
         if len(param) <= 4:
             return
@@ -191,7 +188,6 @@ class DesignProfile(object):
 
         if math.isnan(inital_regression[0]) or inital_regression[2] == 0.0:
             print('help')
-            print(self.name)
             return
 
         mean = np.array(param).mean()
@@ -247,11 +243,11 @@ new linear regression on new dataset without outliers
             bot_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
             bot_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
-            low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
-            low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+            low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
+            low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
 
-            upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
-            upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+            upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
+            upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
 
             std2 = std_new_DEP
 
@@ -355,11 +351,11 @@ new linear regression on new dataset without outliers:
                 bot_ub = profile_DEP[0] * depth[-1] + profile_DEP[1] + std_err_y_est_new_DEP * z_val
                 bot_be = profile_DEP[0] * depth[-1] + profile_DEP[1]
 
-                low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
-                low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+                low_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
+                low_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] - tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
 
-                upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
-                upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3*n/(n*n-1))))
+                upp_mean_95_top = profile_DEP[0] * depth[0] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
+                upp_mean_95_bot = profile_DEP[0] * depth[-1] + profile_DEP[1] + tvalue * std * (np.sqrt((1 / n) + (3 * n / (n * n - 1))))
 
                 std2 = std_new_DEP
 
@@ -377,7 +373,7 @@ new linear regression on new dataset without outliers:
                 upp_mean_95 = [upp_mean_95_top, upp_mean_95_bot]
                 low_mean_95 = [low_mean_95_top, low_mean_95_bot]
                 std_arr = [std, std2]
-        
+
         if self.plot == True:
             DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, self.name, mode, self.save)
 
@@ -405,25 +401,20 @@ new linear regression on new dataset without outliers:
         graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("—")[0]}', loc='center')
-        plt.savefig(f'{save}\{name}.pdf', dpi=600.0)
+        plt.savefig(f'{save}\{name} {mode}.pdf', dpi=600.0)
         #plt.show()
 
-    #     # def move_line(event):
-    #     #     if move_best == True:
-    #     #         print(best[0].get_xdata())
-    #     #         new_best = [x + 10 for x in best[0].get_xdata()]
-    #     #         new_low = [x + 10 for x in lower[0].get_xdata()] #lb + (event.xdata / 0.5)
-    #     #         new_upp = [x + 10 for x in upper[0].get_xdata()] #ub + (event.xdata / 0.5)
-    #     #         best[0].set_xdata(new_best)
-    #     #         lower[0].set_xdata(new_low)
-    #     #         upper[0].set_xdata(new_upp)
-    #     #         fig.canvas.draw()
-    #     move_best = True
-    #     # fig.canvas.mpl_connect('button_press_event', move_line)
-
 #TESTING
-# df = pd.read_excel("50.xlsx", sheet_name="UCS")
+# df = pd.read_excel("50.xlsx", sheet_name="MC")
 # df = df.sort_values(by=['depth'])
 # df.reset_index(inplace=True)
 
-# DesignProfile.profile(param=df['ucs'], depth=df['depth'], name="UCS", model="DEP", self.zvalue=90, plot=True, save="")
+# profile = DesignProfile()
+# profile.model = "DEP"
+# profile.zvalue = 75
+# profile.plot = True
+# profile.save = "C:/Users/Public/Documents"
+# profile.param = df['mc']
+# profile.depth = df['depth']
+# profile.name = f'UCS (kPa)'
+# test_profile = DesignProfile.profile(self=profile)

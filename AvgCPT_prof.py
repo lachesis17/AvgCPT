@@ -309,8 +309,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.profile = DesignProfile()
                 self.profile.model = self.get_model()
                 self.profile.zvalue = int(self.quant_box.currentText())
-                self.profile.plot=self.pdf_box.isChecked()
-                self.profile.save=self.pdf_location
+                self.profile.plot = self.pdf_box.isChecked()
+                self.profile.save = self.pdf_location
 
                 self.profile.param = qc_list['STCN_QC']
                 self.profile.depth = qc_list['true_depth']
