@@ -305,56 +305,44 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fr_dict[f'Layers'] = ['fr profile']
                 self.ic_dict[f'Layers'] = ['ic profile']
 
-                qc_profile = DesignProfile.profile(
-                    param=qc_list['STCN_QC'], 
-                    depth=qc_list['true_depth'], 
-                    name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}', 
-                    model=self.get_model(), 
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                '''subclass design profile and add init vars, then save parameter profiles to each subclass profile function'''
+                self.profile = DesignProfile()
+                self.profile.model = self.get_model()
+                self.profile.zvalue = int(self.quant_box.currentText())
+                self.profile.plot=self.pdf_box.isChecked()
+                self.profile.save=self.pdf_location
 
-                fs_profile = DesignProfile.profile(
-                    param=fs_list['STCN_FS'], 
-                    depth=fs_list['true_depth'], 
-                    name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
-                    model=self.get_model(), 
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                self.profile.param = qc_list['STCN_QC']
+                self.profile.depth = qc_list['true_depth']
+                self.profile.name = f'qc (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                qc_profile = DesignProfile.profile(self=self.profile)
 
-                u_profile = DesignProfile.profile(param=u_list['STCN_U'], 
-                    depth=qc_list['true_depth'], 
-                    name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
-                    model=self.get_model(), 
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                self.profile.param = fs_list['STCN_FS']
+                self.profile.depth = fs_list['true_depth']
+                self.profile.name = f'fs (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                fs_profile = DesignProfile.profile(self=self.profile)
 
-                qnet_profile = DesignProfile.profile(param=qnet_list['STCN_Qnet'], 
-                    depth=qnet_list['true_depth'], 
-                    name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
-                    model=self.get_model(),
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                self.profile.param = u_list['STCN_U']
+                self.profile.depth = qc_list['true_depth']
+                self.profile.name = f'u (kPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                u_profile = DesignProfile.profile(self=self.profile)
 
-                fr_profile = DesignProfile.profile(param=fr_list['STCN_FCRO'], 
-                    depth=fr_list['true_depth'], 
-                    name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
-                    model=self.get_model(), 
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                self.profile.param = qnet_list['STCN_Qnet']
+                self.profile.depth = qnet_list['true_depth']
+                self.profile.name = f'qnet (MPa) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                qnet_profile = DesignProfile.profile(self=self.profile)
 
-                ic_profile = DesignProfile.profile(param=ic_list['STCN_SBTi'], 
-                    depth=ic_list['true_depth'], 
-                    name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}',
-                    model=self.get_model(), 
-                    zvalue=int(self.quant_box.currentText()), 
-                    plot=self.pdf_box.isChecked(),
-                    save=self.pdf_location)
+                self.profile.param = fr_list['STCN_FCRO']
+                self.profile.depth = fr_list['true_depth']
+                self.profile.name = f'fr (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                fr_profile = DesignProfile.profile(self=self.profile)
 
+                self.profile.param=ic_list['STCN_SBTi']
+                self.profile.depth=ic_list['true_depth']
+                self.profile.name = f'ic (-) — {bh} {layer[0]}m to {layer[1]}m - {unit[1]} {unit[0]}'
+                ic_profile = DesignProfile.profile(self=self.profile)
+
+                '''append profiles to dictionary for export'''
                 self.qc_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{qc_profile}"]#, qc_list['STCN_QC'].mean(),qc_list['STCN_QC'].std()]
                 self.fs_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{fs_profile}"]
                 self.u_dict[f'{bh}|{layer[0]}m to {layer[1]}m - {unit[1]}'] = [F"{u_profile}"]

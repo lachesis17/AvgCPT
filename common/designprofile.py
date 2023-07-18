@@ -7,96 +7,107 @@ import pandas as pd
 from types import NoneType
 sys.stdout.reconfigure(encoding='utf-8')
 
-class DesignProfile():    
-    def profile(param:list, depth:list, name:str, model:str, zvalue:int, plot:bool, save: str) -> list:
+class DesignProfile(object):    
+    """
+    Perform statistical analysis on two lists (x,y) for linear regression (scipy) to determine best estimate, lower and upper bounds of (x) data.
+    Removes outliers with independant or dependant models and returns list of lists with top/bot bot values of best estimate, lower bounds, upper bounds as: [[be_top,be_bot][lb_top,lb_bot][ub_top,ub_bot]]
+
+    Parameters
+    ----------
+    param : (x) list or column from pandas dataframe - converted to numpy array 
+
+    depth: (y) list or column from pandas dataframe - converted to numpy array 
+
+    name : str for description of param, used to pass units for plotting if used, or to preserve desired data (e.g. borehole, layer)
+
+    model : str = "DEP", "IND", "AUTO"
+
+        "DEP" : for Dependant model, removes outliers of (x) data with linear regression and depth (y) with:
+        slope * depth + intercept -/+ standard error of y estimate * 1.96
+
+        "IND" : for Independant model, removes outliers of (x) data with mean and standard deviation with:
+        mean -/+ standard deviation * 1.96
+
+        "AUTO" : selects model based on the lesser standard deviation of both models
+
+        -/+ used to determine lower/upper bounds
+
+    self.zvalue : int = 60, 65, 70, 75, 80, 85, 90, 95
+
+        pass an int to select quantile of lower/upper bounds based on table of normal distribtion with examples:
+
+        70 = 70% & 30% quantile
+
+        75 = 75% & 25% quantile
+
+        90 = 90% & 10% quantile
+
+        95 = 95% & 5% quantile
+
+    plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
+
+    save : str = directory to save export of plots
         """
-        Perform statistical analysis on two lists (x,y) for linear regression (scipy) to determine best estimate, lower and upper bounds of (x) data.
-        Removes outliers with independant or dependant models and returns list of lists with top/bot bot values of best estimate, lower bounds, upper bounds as: [[be_top,be_bot][lb_top,lb_bot][ub_top,ub_bot]]
+    
+    def __init__(self, *args):
+        super(DesignProfile, self).__init__()
+        self.param: list
+        self.depth: list
+        self.name: str
+        self.model: str
+        self.zvalue: int
+        self.plot: bool
+        self.save: str
 
-        Parameters
-        ----------
-        param : (x) list or column from pandas dataframe - converted to numpy array 
+    def profile(self) -> list:
 
-        depth: (y) list or column from pandas dataframe - converted to numpy array 
-
-        name : str for description of param, used to pass units for plotting if used, or to preserve desired data (e.g. borehole, layer)
-
-        model : str = "DEP", "IND", "AUTO"
-
-            "DEP" : for Dependant model, removes outliers of (x) data with linear regression and depth (y) with:
-            slope * depth + intercept -/+ standard error of y estimate * 1.96
-
-            "IND" : for Independant model, removes outliers of (x) data with mean and standard deviation with:
-            mean -/+ standard deviation * 1.96
-
-            "AUTO" : selects model based on the lesser standard deviation of both models
-
-            -/+ used to determine lower/upper bounds
-
-        zvalue : int = 60, 65, 70, 75, 80, 85, 90, 95
-
-            pass an int to select quantile of lower/upper bounds based on table of normal distribtion with examples:
-
-            70 = 70% & 30% quantile
-
-            75 = 75% & 25% quantile
-
-            90 = 90% & 10% quantile
-
-            95 = 95% & 5% quantile
-
-        plot : bool = True for plotting (x,y) with matplotlib for QA of model type or upper/lower bounds and best estimate
-
-        save : str = directory to save export of plots
-            """
-
-        if len(param) <= 4 or all(isinstance(x, NoneType) for x in param):
+        if len(self.param) <= 4 or all(isinstance(x, NoneType) for x in self.param):
             return
 
-        if any(isinstance(x, str) for x in param):
-            param = [float(param) for iter,(param,depth) in enumerate(zip(param,depth)) if not param == ""]
-            depth = [float(depth) for iter,(param,depth) in enumerate(zip(param,depth)) if not param == ""]
-            param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
-            depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+        if any(isinstance(x, str) for x in self.param):
+            param = [float(param) for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not param == ""]
+            depth = [float(depth) for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not param == ""]
+            param = [param for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
+            depth = [depth for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
         else: 
-            param = [param for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
-            depth = [depth for iter,(param,depth) in enumerate(zip(param,depth)) if not np.isnan(param)]
+            param = [param for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
+            depth = [depth for iter,(param,depth) in enumerate(zip(self.param,self.depth)) if not np.isnan(param)]
 
-        if zvalue == 60:
+        if self.zvalue == 60:
             z_val = 0.26
             quant_upp = "60%"
             quant_low = "40%"
-        if zvalue == 65:
+        if self.zvalue == 65:
             z_val = 0.39
             quant_upp = "65%"
             quant_low = "35%"
-        if zvalue == 70:
+        if self.zvalue == 70:
             z_val = 0.53
             quant_upp = "70%"
             quant_low = "30%"
-        if zvalue == 75:
+        if self.zvalue == 75:
             z_val = 0.68
             quant_upp = "75%"
             quant_low = "25%"
-        if zvalue == 80:
+        if self.zvalue == 80:
             z_val = 0.85
             quant_upp = "80%"
             quant_low = "20%"
-        if zvalue == 85:
+        if self.zvalue == 85:
             z_val = 1.04
             quant_upp = "85%"
             quant_low = "15%"
-        if zvalue == 90:
+        if self.zvalue == 90:
             z_val = 1.29
             quant_upp = "90%"
             quant_low = "10%"
-        if zvalue == 95:
+        if self.zvalue == 95:
             z_val = 1.65
             quant_upp = "95%"
             quant_low = "5%"
         
-        param = np.array(param)
-        depth = np.array(depth)
+        param = np.array(self.param)
+        depth = np.array(self.depth)
     
         if len(param) <= 4:
             return
@@ -180,6 +191,7 @@ class DesignProfile():
 
         if math.isnan(inital_regression[0]) or inital_regression[2] == 0.0:
             print('help')
+            print(self.name)
             return
 
         mean = np.array(param).mean()
@@ -221,7 +233,7 @@ class DesignProfile():
 
         profile_IND = [mean_new_IND, std_new_IND]
 
-        if model == "DEP":
+        if self.model == "DEP":
             mode = "Depth Dependent"
             print(f'''~DEPENDENT~
 new linear regression on new dataset without outliers
@@ -244,7 +256,7 @@ new linear regression on new dataset without outliers
             std2 = std_new_DEP
 
             print('------------------------------------------')
-            print(name,mode)
+            print(self.name,mode)
             print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
             print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
@@ -258,7 +270,7 @@ new linear regression on new dataset without outliers
             low_mean_95 = [low_mean_95_top, low_mean_95_bot]
             std_arr = [std, std2]
 
-        if model == "IND":
+        if self.model == "IND":
             mode = "Independent of Depth"
             print(f'''~INDEPENDENT~
 independent mean and standard deviation:
@@ -278,7 +290,7 @@ independent mean and standard deviation:
             std2 = std_new_IND
 
             print('------------------------------------------')
-            print(name,mode)
+            print(self.name,mode)
             print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
             print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
             print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
@@ -294,7 +306,7 @@ independent mean and standard deviation:
 
         '''auto model''' # determines best model to use based on lesser value of standard deviation of new dataset of each model 
 
-        if model == "AUTO":
+        if self.model == "AUTO":
             if std_new_IND < std_new_DEP:
                 mode = "Independent of Depth"
                 print(f'''~INDEPENDENT~
@@ -315,7 +327,7 @@ independant mean and standard deviation:
                 std2 = std_new_IND
 
                 print('------------------------------------------')
-                print(name,mode)
+                print(self.name,mode)
                 print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
                 print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
@@ -352,7 +364,7 @@ new linear regression on new dataset without outliers:
                 std2 = std_new_DEP
 
                 print('------------------------------------------')
-                print(name,mode)
+                print(self.name,mode)
                 print(f'Best Estimate | TOP: {top_be}, BOT: {bot_be}')
                 print(f'Lower Bounds | TOP: {top_lb}, BOT: {bot_lb}')
                 print(f'Upper Bounds | TOP: {top_ub}, BOT: {bot_ub}')
@@ -366,8 +378,8 @@ new linear regression on new dataset without outliers:
                 low_mean_95 = [low_mean_95_top, low_mean_95_bot]
                 std_arr = [std, std2]
         
-        if plot == True:
-            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save)
+        if self.plot == True:
+            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, self.name, mode, self.save)
 
         return [be, lb, ub, upp_mean_95, low_mean_95, std_arr]
     
@@ -414,4 +426,4 @@ new linear regression on new dataset without outliers:
 # df = df.sort_values(by=['depth'])
 # df.reset_index(inplace=True)
 
-# DesignProfile.profile(param=df['ucs'], depth=df['depth'], name="UCS", model="DEP", zvalue=90, plot=True, save="")
+# DesignProfile.profile(param=df['ucs'], depth=df['depth'], name="UCS", model="DEP", self.zvalue=90, plot=True, save="")
