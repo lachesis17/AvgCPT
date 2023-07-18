@@ -32,7 +32,7 @@ class DesignProfile(object):
 
         -/+ used to determine lower/upper bounds
 
-    self.zvalue : int = 60, 65, 70, 75, 80, 85, 90, 95
+    zvalue : int = 60, 65, 70, 75, 80, 85, 90, 95
 
         pass an int to select quantile of lower/upper bounds based on table of normal distribtion with examples:
 
