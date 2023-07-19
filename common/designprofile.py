@@ -49,7 +49,7 @@ class DesignProfile(object):
     save : str = directory to save export of plots
     """
     
-    def __init__(self, *args):
+    def __init__(self):
         super(DesignProfile, self).__init__()
         self.param: list
         self.depth: list
@@ -416,5 +416,5 @@ new linear regression on new dataset without outliers:
 # profile.save = "C:/Users/Public/Documents"
 # profile.param = df['mc']
 # profile.depth = df['depth']
-# profile.name = f'UCS (kPa)'
+# profile.name = f'MC (%)'
 # test_profile = DesignProfile.profile(self=profile)
