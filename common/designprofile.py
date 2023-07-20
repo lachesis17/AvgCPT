@@ -4,10 +4,9 @@ import math
 import scipy as sc
 import sys
 import pandas as pd
-from types import NoneType
 sys.stdout.reconfigure(encoding='utf-8')
 
-class DesignProfile(object):    
+class DesignProfile:    
     """
     Perform statistical analysis on two lists (x,y) for linear regression (scipy) to determine best estimate, lower and upper bounds of (x) data.
     Removes outliers with independant or dependant models and returns list of lists with top/bot bot values of best estimate, lower bounds, upper bounds as: [[be_top,be_bot][lb_top,lb_bot][ub_top,ub_bot]]
@@ -49,17 +48,17 @@ class DesignProfile(object):
     save : str = directory to save export of plots
     """
     
-    def __init__(self):
-        super(DesignProfile, self).__init__()
-        self.param: list
-        self.depth: list
-        self.name: str
-        self.model: str
-        self.zvalue: int
-        self.plot: bool
-        self.save: str
+    def __init__(self, param, depth, name, model, zvalue, plot, save):
+        self.param: list = param
+        self.depth: list = depth
+        self.name: str = name
+        self.model: str = model
+        self.zvalue: int = zvalue
+        self.plot: bool = plot
+        self.save: str = save
 
     def profile(self) -> list:
+        NoneType= type(None)
 
         if len(self.param) <= 4 or all(isinstance(x, NoneType) for x in self.param):
             return
@@ -375,12 +374,12 @@ new linear regression on new dataset without outliers:
                 std_arr = [std, std2]
 
         if self.plot == True:
-            DesignProfile.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, self.name, mode, self.save)
+            self.plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, self.name, mode, self.save)
 
         return [be, lb, ub, upp_mean_95, low_mean_95, std_arr]
     
     
-    def plotting(depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save):
+    def plotting(self,depth, param, lb, ub, be, upp_mean_95, low_mean_95, quant_low, quant_upp, name, mode, save):
 
         plt.rcParams.update({'font.size': 8})
         fig, graph = plt.subplots(1, 1, figsize=(7.0,12.5))
@@ -401,7 +400,7 @@ new linear regression on new dataset without outliers:
         graph.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=3, fancybox=True, shadow=True)
         graph.set_ylabel('Depth (m)')
         graph.set_xlabel(f'{str(name).split("—")[0]}', loc='center')
-        plt.savefig(f'{save}\{name} {mode}.pdf', dpi=600.0)
+        plt.savefig(f'{save}\{name} {mode}.pdf', dpi=200.0)
         #plt.show()
 
 #TESTING
